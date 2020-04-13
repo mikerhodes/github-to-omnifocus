@@ -24,6 +24,7 @@ Omnifocus task list.
     - <https://discourse.omnigroup.com/t/omnifocus-javascript-osa-library-feedback/45260/2>
     - <https://discourse.omnigroup.com/t/of3-re-writing-tag-order-in-javascript-macos/44362>
     - <https://discourse.omnigroup.com/t/automatically-flag-tasks-in-specific-projects-contexts-according-to-due-defer-date/32093/28>
+    - Lots of example code <https://discourse.omnigroup.com/t/re-jxa-when-to-use-app-add-app-remove-vs-array-variable-push/49305/14>
 - JS Automation
     - <https://developer.apple.com/library/archive/releasenotes/InterapplicationCommunication/RN-JavaScriptForAutomation/Articles/OSX10-10.html#//apple_ref/doc/uid/TP40014508-CH109-SW14>
     - <https://hackmag.com/coding/getting-to-grips-with-javascript-automation-for-os-x/>

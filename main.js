@@ -8,10 +8,12 @@ const getInboxTasks = osa(() => {
     return of.defaultDocument
         .inboxTasks()
         .filter((task) => task.completed() === false)
-        .map((task) => { return { "id": task.id(), "name": task.name() }; })
+        .map((task) => {
+            return { "id": task.id(), "name": task.name() };
+        });
 })
 
-const newTask = osa((title) => {
+const newTask = osa((projectName, title, tag) => {
 
     const ofApp = Application("OmniFocus")
     const ofDoc = ofApp.defaultDocument
@@ -33,21 +35,42 @@ const newTask = osa((title) => {
         ) : tags()[0]
     }
 
+    const project = ofDoc.flattenedProjects
+        .whose({ name: projectName })[0];
+
     var task = ofApp.Task({
         "name": title,
-        "primaryTag": tagFoundOrCreated("github")
+        "primaryTag": tagFoundOrCreated(tag)
     })
-    ofDoc.inboxTasks.push(task)
+    // ofDoc.inboxTasks.push(task)
+    project.tasks.push(task)
     // var task = ofDoc.parseTasksInto({ withTransportText: "my task | foo @tags(github)", asSingleTask: true })[0]
     return { "id": task.id(), "name": task.name() };
+});
+
+const tasksForProject = osa((projectName) => {
+    const ofApp = Application("OmniFocus")
+    const ofDoc = ofApp.defaultDocument
+    const project = ofDoc.flattenedProjects
+        .whose({ name: projectName })[0];
+
+    return project.tasks()
+        .filter((task) => task.completed() === false)
+        .map((task) => {
+            return { "id": task.id(), "name": task.name() };
+        });
 });
 
 
 function main() {
     // getInboxTasks().then(result => console.log(result))
-    newTask("my task")
-        .then(result => console.log(result))
-        .catch(console.log("Error adding task"))
+
+    // newTask('GitHub Issues', "my task", "github")
+    //     .then(result => console.log(result))
+    //     .catch(console.log("Error adding task"))
+
+    // tasksForProject('GitHub Issues')
+    //     .then(result => result.forEach(t => console.log(t)));
 }
 
 main()
