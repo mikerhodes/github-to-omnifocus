@@ -33,8 +33,8 @@ const markIncomplete = osa((taskId) => {
 
 const newTask = osa(() => {
     var of = Application("OmniFocus")
-    var t = of.Task({ "name": "my task" }) // "primaryTag": of.Tag({ "name": "github" }) })
-    of.defaultDocument.tasks.push(t)
+    var t = of.Task({ "name": "my task" }) //, "primaryTag": of.Tag({ "name": "github" }) })
+    of.defaultDocument.inboxTasks.push(t)
     // var task = of.defaultDocument.parseTasksInto({ withTransportText: "my task | foo @tags(github)", asSingleTask: true })[0]
     // return { "id": task.id(), "name": task.name() };
 });
