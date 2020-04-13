@@ -91,15 +91,19 @@ async function main() {
         baseUrl: config.github.gh_api_url,
         log: console,
     })
+    var issues = await octokit.issues.list({
+        filter: "assigned",
+        state: "open"
+    })
 
     tasksForProject('GitHub Issues')
         .then(result => {
             var tasks = result.map(t => t.name)
-            addNewIssues(tasks, octokit)
+            addNewIssues(tasks, issues)
         });
 }
 
-async function addNewIssues(currentTasks, octokit) {
+async function addNewIssues(currentTasks, issues) {
 
     // addIssueToOmniFocus understands how to take the JSON from
     // the GH API for an issue and make a task for it.
@@ -113,10 +117,7 @@ async function addNewIssues(currentTasks, octokit) {
     }
     // currentTasks.forEach(t => console.log(t))
     try {
-        var issues = await octokit.issues.list({
-            filter: "assigned",
-            state: "open"
-        })
+        // Add new tasks
         var addTaskPromises = []
         issues.data
             .filter(t => {
