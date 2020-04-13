@@ -1,48 +1,53 @@
+'use strict';
+
 const osa = require('osa2');
 
 const getInboxTasks = osa(() => {
-    var om = Application("OmniFocus")
-    return om.defaultDocument
+    var of = Application("OmniFocus")
+    of.includeStandardAdditions = true;
+    return of.defaultDocument
         .inboxTasks()
         .filter((task) => task.completed() === false)
         .map((task) => { return { "id": task.id(), "name": task.name() }; })
 })
 
+const newTask = osa((title) => {
 
-const markComplete = osa((taskId) => {
-    var om = Application("OmniFocus")
-    const task = om.defaultDocument
-        .flattenedTasks()
-        .filter(task => task.id() === taskId)
-    if (task) {
-        return Application('OmniFocus').markComplete(task)
+    const ofApp = Application("OmniFocus")
+    const ofDoc = ofApp.defaultDocument
+
+    // https://discourse.omnigroup.com/t/automatically-flag-tasks-in-specific-projects-contexts-according-to-due-defer-date/32093/28
+    const tagFoundOrCreated = charTag => {
+        const
+            tags = ofDoc.flattenedTags.whose({
+                name: charTag
+            }),
+            oTag = ofApp.Tag({
+                name: charTag
+            });
+        return tags.length === 0 ? (
+            (
+                ofDoc.tags.push(oTag),
+                oTag
+            )
+        ) : tags()[0]
     }
-    return false
-});
 
-const markIncomplete = osa((taskId) => {
-    var om = Application("OmniFocus")
-    const task = om.defaultDocument
-        .flattenedTasks()
-        .filter(task => task.id() === taskId)
-    if (task) {
-        return Application('OmniFocus').markIncomplete(task)
-    }
-    return false
-});
-
-const newTask = osa(() => {
-    var of = Application("OmniFocus")
-    var t = of.Task({ "name": "my task" }) //, "primaryTag": of.Tag({ "name": "github" }) })
-    of.defaultDocument.inboxTasks.push(t)
-    // var task = of.defaultDocument.parseTasksInto({ withTransportText: "my task | foo @tags(github)", asSingleTask: true })[0]
-    // return { "id": task.id(), "name": task.name() };
+    var task = ofApp.Task({
+        "name": title,
+        "primaryTag": tagFoundOrCreated("github")
+    })
+    ofDoc.inboxTasks.push(task)
+    // var task = ofDoc.parseTasksInto({ withTransportText: "my task | foo @tags(github)", asSingleTask: true })[0]
+    return { "id": task.id(), "name": task.name() };
 });
 
 
 function main() {
     // getInboxTasks().then(result => console.log(result))
-    newTask().then(result => console.log(result)).catch(console.log("Error adding task"))
+    newTask("my task")
+        .then(result => console.log(result))
+        .catch(console.log("Error adding task"))
 }
 
 main()
