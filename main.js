@@ -64,6 +64,14 @@ const tasksForProject = osa((projectName) => {
         });
 });
 
+const markTaskComplete = osa((taskId) => {
+    const task = Application('OmniFocus').defaultDocument.flattenedTasks().filter(task => task.id() === taskId)
+    if (task) {
+        return Application('OmniFocus').markComplete(task)
+    }
+    return false
+});
+
 
 async function main() {
 
@@ -100,6 +108,8 @@ async function main() {
         .then(result => {
             var tasks = result.map(t => t.name)
             addNewIssues(tasks, issues)
+            // TODO complete issues missing from the list
+            completeMissingIssues(result, issues)
         });
 }
 
@@ -140,6 +150,11 @@ async function addNewIssues(currentTasks, issues) {
     } catch (err) {
         console.error(err.message)
     }
+}
+
+async function completeMissingIssues(currentTasks, issues) {
+    // TODO
+    // find tasks in currentTasks with no issue in issues, mark complete
 }
 
 main()
