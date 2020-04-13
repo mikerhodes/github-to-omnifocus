@@ -107,13 +107,17 @@ async function addNewIssues(currentTasks, octokit) {
         // console.log( + " " + t.html_url)
         const taskName = t.repository.full_name + "#" + t.number + " " + t.title
         const taskURL = t.html_url
-        newTask('GitHub Issues', taskName, "github", taskURL)
-            .then(result => console.log(result))
-            .catch(err => console.log("Error adding task: " + err))
+        return newTask('GitHub Issues', taskName, "github", taskURL)
+        // .then(result => console.log(result))
+        // .catch(err => console.log("Error adding task: " + err))
     }
-    currentTasks.forEach(t => console.log(t))
+    // currentTasks.forEach(t => console.log(t))
     try {
-        var issues = await octokit.issues.list()
+        var issues = await octokit.issues.list({
+            filter: "assigned",
+            state: "open"
+        })
+        var addTaskPromises = []
         issues.data
             .filter(t => {
                 // We assume the user hasn't changed the task prefix,
@@ -130,8 +134,14 @@ async function addNewIssues(currentTasks, octokit) {
             })
             .forEach(t => {
                 console.log("Adding: " + t.repository.full_name + "#" + t.number)
-                addIssueToOmniFocus(t)
+                addTaskPromises.push(addIssueToOmniFocus(t))
             })
+        // console.log(addTaskPromises)
+        console.log("Waiting for " + addTaskPromises.length + " tasks to be added...")
+        await Promise.all(addTaskPromises).then(() => {
+            console.log("Issues added!")
+        })
+
     } catch (err) {
         console.error(err.message)
     }
