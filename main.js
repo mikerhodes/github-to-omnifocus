@@ -108,12 +108,9 @@ async function addNewIssues(currentTasks, issues) {
     // addIssueToOmniFocus understands how to take the JSON from
     // the GH API for an issue and make a task for it.
     const addIssueToOmniFocus = t => {
-        // console.log( + " " + t.html_url)
         const taskName = t.repository.full_name + "#" + t.number + " " + t.title
         const taskURL = t.html_url
         return newTask('GitHub Issues', taskName, "github", taskURL)
-        // .then(result => console.log(result))
-        // .catch(err => console.log("Error adding task: " + err))
     }
     // currentTasks.forEach(t => console.log(t))
     try {
@@ -121,20 +118,17 @@ async function addNewIssues(currentTasks, issues) {
         var addTaskPromises = []
         issues.data
             .filter(t => {
+                // Filter out issues where we appaear to alrady have
+                // an associated task.
                 // We assume the user hasn't changed the task prefix,
-                // which should be unique to the issue
+                // which should be unique to the issue.
                 var prefix = t.repository.full_name + "#" + t.number
                 console.log("Found issue: " + prefix)
-                var found = false
-                currentTasks.forEach(element => {
-                    if (element.startsWith(prefix)) {
-                        found = true
-                    }
-                });
-                return !found
+                return !currentTasks.some(e => e.startsWith(prefix))
             })
             .forEach(t => {
-                console.log("Adding: " + t.repository.full_name + "#" + t.number)
+                var prefix = t.repository.full_name + "#" + t.number
+                console.log("Adding issue: " + prefix)
                 addTaskPromises.push(addIssueToOmniFocus(t))
             })
         // console.log(addTaskPromises)
