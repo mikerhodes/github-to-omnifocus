@@ -3,6 +3,16 @@
 A script to add GitHub issues that are assigned to you to your
 Omnifocus task list.
 
+## Using
+
+Create `~/.github-to-omnifocus` with:
+
+```toml
+[github]
+gh_api_url = "https://..."
+gh_auth_token = "developertoken"
+```
+
 ## Developing
 
 - [Add the Omnifocus application to your Script Editor
@@ -25,6 +35,7 @@ Omnifocus task list.
     - <https://discourse.omnigroup.com/t/of3-re-writing-tag-order-in-javascript-macos/44362>
     - <https://discourse.omnigroup.com/t/automatically-flag-tasks-in-specific-projects-contexts-according-to-due-defer-date/32093/28>
     - Lots of example code <https://discourse.omnigroup.com/t/re-jxa-when-to-use-app-add-app-remove-vs-array-variable-push/49305/14>
+    - Simple create new task <https://discourse.omnigroup.com/t/creating-a-new-task-with-javascript-for-automation-jxa/22393>
 - JS Automation
     - <https://developer.apple.com/library/archive/releasenotes/InterapplicationCommunication/RN-JavaScriptForAutomation/Articles/OSX10-10.html#//apple_ref/doc/uid/TP40014508-CH109-SW14>
     - <https://hackmag.com/coding/getting-to-grips-with-javascript-automation-for-os-x/>

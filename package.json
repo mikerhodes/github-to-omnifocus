@@ -9,6 +9,8 @@
   "author": "Mike Rhodes",
   "license": "ISC",
   "dependencies": {
-    "osa2": "^0.2.3"
+    "@octokit/rest": "^17.2.1",
+    "osa2": "^0.2.3",
+    "toml": "^3.0.0"
   }
 }

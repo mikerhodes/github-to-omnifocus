@@ -1,6 +1,9 @@
 'use strict';
 
 const osa = require('osa2');
+const toml = require('toml');
+const fs = require('fs')
+const { Octokit } = require("@octokit/rest");
 
 const getInboxTasks = osa(() => {
     var of = Application("OmniFocus")
@@ -13,7 +16,7 @@ const getInboxTasks = osa(() => {
         });
 })
 
-const newTask = osa((projectName, title, tag) => {
+const newTask = osa((projectName, title, tag, taskNote) => {
 
     const ofApp = Application("OmniFocus")
     const ofDoc = ofApp.defaultDocument
@@ -40,11 +43,11 @@ const newTask = osa((projectName, title, tag) => {
 
     var task = ofApp.Task({
         "name": title,
-        "primaryTag": tagFoundOrCreated(tag)
+        "primaryTag": tagFoundOrCreated(tag),
+        "note": taskNote,
     })
     // ofDoc.inboxTasks.push(task)
     project.tasks.push(task)
-    // var task = ofDoc.parseTasksInto({ withTransportText: "my task | foo @tags(github)", asSingleTask: true })[0]
     return { "id": task.id(), "name": task.name() };
 });
 
@@ -62,15 +65,76 @@ const tasksForProject = osa((projectName) => {
 });
 
 
-function main() {
-    // getInboxTasks().then(result => console.log(result))
+async function main() {
 
-    // newTask('GitHub Issues', "my task", "github")
-    //     .then(result => console.log(result))
-    //     .catch(console.log("Error adding task"))
+    var tomlConfig, config
 
-    // tasksForProject('GitHub Issues')
-    //     .then(result => result.forEach(t => console.log(t)));
+    try {
+        tomlConfig = fs.readFileSync('/Users/mike/.github-to-omnifocus', 'utf8')
+    } catch (err) {
+        console.error(err)
+    }
+
+    try {
+        config = toml.parse(tomlConfig);
+    } catch (e) {
+        console.error("Parsing error on line " + e.line + ", column " + e.column +
+            ": " + e.message);
+    }
+
+    console.log(`Using API server: ${config.github.gh_api_url}`);
+    console.log(`Using token: ${config.github.gh_auth_token}`);
+
+    const octokit = new Octokit({
+        auth: config.github.gh_auth_token, // token
+        userAgent: "github-to-omnifocus/1.0.0",
+        baseUrl: config.github.gh_api_url,
+        log: console,
+    })
+
+    tasksForProject('GitHub Issues')
+        .then(result => {
+            var tasks = result.map(t => t.name)
+            addNewIssues(tasks, octokit)
+        });
+}
+
+async function addNewIssues(currentTasks, octokit) {
+
+    // addIssueToOmniFocus understands how to take the JSON from
+    // the GH API for an issue and make a task for it.
+    const addIssueToOmniFocus = t => {
+        // console.log( + " " + t.html_url)
+        const taskName = t.repository.full_name + "#" + t.number + " " + t.title
+        const taskURL = t.html_url
+        newTask('GitHub Issues', taskName, "github", taskURL)
+            .then(result => console.log(result))
+            .catch(err => console.log("Error adding task: " + err))
+    }
+    currentTasks.forEach(t => console.log(t))
+    try {
+        var issues = await octokit.issues.list()
+        issues.data
+            .filter(t => {
+                // We assume the user hasn't changed the task prefix,
+                // which should be unique to the issue
+                var prefix = t.repository.full_name + "#" + t.number
+                console.log("Found issue: " + prefix)
+                var found = false
+                currentTasks.forEach(element => {
+                    if (element.startsWith(prefix)) {
+                        found = true
+                    }
+                });
+                return !found
+            })
+            .forEach(t => {
+                console.log("Adding: " + t.repository.full_name + "#" + t.number)
+                addIssueToOmniFocus(t)
+            })
+    } catch (err) {
+        console.error(err.message)
+    }
 }
 
 main()
