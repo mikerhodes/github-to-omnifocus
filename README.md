@@ -9,8 +9,8 @@ Create `~/.github-to-omnifocus` with:
 
 ```toml
 [github]
-gh_api_url = "https://..."
-gh_auth_token = "developertoken"
+api_url = "https://..."
+auth_token = "developertoken"
 ```
 
 ## Developing

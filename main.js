@@ -97,15 +97,16 @@ async function main() {
     }
 
     console.log("Config loaded.")
-    console.log(`Using API server: ${config.github.gh_api_url}`);
-    console.log(`Using token: ${config.github.gh_auth_token}`);
+    console.log(`Using API server: ${config.github.api_url}`);
+    console.log(`Using token: ${config.github.auth_token}`);
 
     const octokit = new Octokit({
-        auth: config.github.gh_auth_token, // token
+        auth: config.github.auth_token, // token
         userAgent: "github-to-omnifocus/1.0.0",
-        baseUrl: config.github.gh_api_url,
+        baseUrl: config.github.api_url,
         log: console,
     })
+
     var issues = await octokit.issues.list({
         filter: "assigned",
         state: "open"
