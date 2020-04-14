@@ -115,7 +115,6 @@ async function main() {
         .then(result => {
             var tasks = result.map(t => t.name)
             addNewIssues(tasks, issues)
-            // TODO complete issues missing from the list
             completeMissingIssues(result, issues)
         });
 }
