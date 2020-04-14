@@ -138,8 +138,8 @@ async function addNewIssues(currentTasks, issues) {
                 const p = prefix(iss) // don't create new prefix for every some() check
                 return !currentTasks.some(e => e.startsWith(p))
             })
-            .forEach(iss => console.log("Adding issue: " + prefix(iss)))
             .map(iss => {
+                console.log("Adding issue: " + prefix(iss))
                 const taskName = prefix(iss) + " " + iss.title
                 const taskURL = iss.html_url
                 return addNewTask('GitHub Issues', taskName, "github", taskURL)
@@ -175,8 +175,10 @@ async function completeMissingIssues(currentTasks, issues) {
         // mark them complete.
         var removeTaskPromises = currentTasks
             .filter((t) => !issuePrefixes.some(e => t.name.startsWith(e)))
-            .forEach((t) => console.log("Mark complete: " + t.name))
-            .map((t) => markTaskComplete(t.id))
+            .map((t) => {
+                console.log("Mark complete: " + t.name)
+                markTaskComplete(t.id)
+            })
 
         console.log(`Waiting for ${removeTaskPromises.length} tasks to be completed...`)
         await Promise.all(removeTaskPromises).then(() => {
