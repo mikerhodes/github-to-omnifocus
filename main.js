@@ -4,6 +4,7 @@ const osa = require('osa2');
 const toml = require('toml');
 const fs = require('fs')
 const { Octokit } = require("@octokit/rest");
+const os = require('os')
 
 const getInboxTasks = osa(() => {
     var of = Application("OmniFocus")
@@ -77,10 +78,14 @@ async function main() {
 
     var tomlConfig, config
 
+    var configFilePath = `${os.homedir()}/.github-to-omnifocus.toml`
+    console.log(`Reading config at ${configFilePath}...`)
+
     try {
-        tomlConfig = fs.readFileSync('/Users/mike/.github-to-omnifocus', 'utf8')
+        tomlConfig = fs.readFileSync(configFilePath, 'utf8')
     } catch (err) {
         console.error(err)
+        process.exit(1)
     }
 
     try {
@@ -88,8 +93,10 @@ async function main() {
     } catch (e) {
         console.error("Parsing error on line " + e.line + ", column " + e.column +
             ": " + e.message);
+        process.exit(1)
     }
 
+    console.log("Config loaded.")
     console.log(`Using API server: ${config.github.gh_api_url}`);
     console.log(`Using token: ${config.github.gh_auth_token}`);
 
