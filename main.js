@@ -159,9 +159,36 @@ async function addNewIssues(currentTasks, issues) {
     }
 }
 
+/**
+ * completeMissingIssues makes issues in currentTasks complete that are
+ * missing from issues.
+ * @param {object} currentTasks {id, name}
+ * @param {object} issues ghissue
+ */
 async function completeMissingIssues(currentTasks, issues) {
-    // TODO
-    // find tasks in currentTasks with no issue in issues, mark complete
+
+    // Generate list of prefixes that we use for tasks within
+    // OmniFocus, which will allow us to figure out which tasks
+    // are no longer in issues, so we can remove them.
+    const prefix = t => t.repository.full_name + "#" + t.number
+    const issuePrefixes = issues.data.map((t) => prefix(t))
+
+    try {
+        // Filter down to list of tasks where there is no corresponding
+        // issue currently assigned to us via prefix matching, then
+        // mark them complete.
+        var removeTaskPromises = currentTasks
+            .filter((t) => !issuePrefixes.some(e => t.name.startsWith(e)))
+            .forEach((t) => console.log("Mark complete: " + t.name))
+            .map((t) => markTaskComplete(t.id))
+
+        console.log(`Waiting for ${removeTaskPromises.length} tasks to be completed...`)
+        await Promise.all(removeTaskPromises).then(() => {
+            console.log("Issues removed!")
+        })
+    } catch (err) {
+        console.log(err);
+    }
 }
 
 main()
