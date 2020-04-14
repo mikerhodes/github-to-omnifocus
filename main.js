@@ -107,18 +107,24 @@ async function main() {
         log: console,
     })
 
-    var issues = await octokit.issues.list({
-        filter: "assigned",
-        state: "open"
-    })
+    try {
 
-    const tasks = await tasksForProject('GitHub Issues')
+        var issues = await octokit.issues.list({
+            filter: "assigned",
+            state: "open"
+        })
 
-    await addNewIssues(tasks.map(t => t.name), issues)
-    console.log("Issues added!")
+        const tasks = await tasksForProject('GitHub Issues')
 
-    await completeMissingIssues(tasks, issues)
-    console.log("Issues removed!")
+        await addNewIssues(tasks.map(t => t.name), issues)
+        console.log("Issues added!")
+
+        await completeMissingIssues(tasks, issues)
+        console.log("Issues removed!")
+
+    } catch (err) {
+        console.error(err)
+    }
 }
 
 /**
