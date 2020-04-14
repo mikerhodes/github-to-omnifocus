@@ -160,8 +160,8 @@ async function addNewIssues(currentTasks, issues) {
 }
 
 /**
- * completeMissingIssues makes issues in currentTasks complete that are
- * missing from issues.
+ * completeMissingIssues marks tasks in `currentTasks` complete which have
+ * no corresponding issue in `issues`.
  * @param {object} currentTasks {id, name}
  * @param {object} issues ghissue
  */
