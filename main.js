@@ -124,8 +124,9 @@ async function addNewIssues(currentTasks, issues) {
 
     // addIssueToOmniFocus understands how to take the JSON from
     // the GH API for an issue and make a task for it.
+    const prefix = t => t.repository.full_name + "#" + t.number
     const addIssueToOmniFocus = t => {
-        const taskName = t.repository.full_name + "#" + t.number + " " + t.title
+        const taskName = prefix(t) + " " + t.title
         const taskURL = t.html_url
         return newTask('GitHub Issues', taskName, "github", taskURL)
     }
@@ -139,13 +140,12 @@ async function addNewIssues(currentTasks, issues) {
                 // an associated task.
                 // We assume the user hasn't changed the task prefix,
                 // which should be unique to the issue.
-                var prefix = t.repository.full_name + "#" + t.number
-                console.log("Found issue: " + prefix)
-                return !currentTasks.some(e => e.startsWith(prefix))
+                console.log("Found issue: " + prefix(t))
+                const p = prefix(t)
+                return !currentTasks.some(e => e.startsWith(p))
             })
             .forEach(t => {
-                var prefix = t.repository.full_name + "#" + t.number
-                console.log("Adding issue: " + prefix)
+                console.log("Adding issue: " + prefix(t))
                 addTaskPromises.push(addIssueToOmniFocus(t))
             })
         // console.log(addTaskPromises)
