@@ -17,7 +17,7 @@ const getInboxTasks = osa(() => {
         });
 })
 
-const newTask = osa((projectName, title, tag, taskNote) => {
+const addNewTask = osa((projectName, title, tag, taskNote) => {
 
     const ofApp = Application("OmniFocus")
     const ofDoc = ofApp.defaultDocument
@@ -120,35 +120,32 @@ async function main() {
         });
 }
 
+/**
+ * addNewIssues makes new tasks for `issues` which have no task in
+ * `currentTasks`.
+ * @param {object} currentTasks {id, name}
+ * @param {object} issues ghissue
+ */
 async function addNewIssues(currentTasks, issues) {
 
-    // addIssueToOmniFocus understands how to take the JSON from
-    // the GH API for an issue and make a task for it.
-    const prefix = t => t.repository.full_name + "#" + t.number
-    const addIssueToOmniFocus = t => {
-        const taskName = prefix(t) + " " + t.title
-        const taskURL = t.html_url
-        return newTask('GitHub Issues', taskName, "github", taskURL)
-    }
-    // currentTasks.forEach(t => console.log(t))
+    const prefix = iss => iss.repository.full_name + "#" + iss.number
+
     try {
-        // Add new tasks
-        var addTaskPromises = []
-        issues.data
-            .filter(t => {
-                // Filter out issues where we appaear to alrady have
-                // an associated task.
-                // We assume the user hasn't changed the task prefix,
-                // which should be unique to the issue.
-                console.log("Found issue: " + prefix(t))
-                const p = prefix(t)
+        // Filter down list of active assigned issues to those which do
+        // not have a corresponding task (via prefix matching). Add these
+        // issues as new tasks.
+        const addTaskPromises = issues.data
+            .filter(iss => {
+                const p = prefix(iss) // don't create new prefix for every some() check
                 return !currentTasks.some(e => e.startsWith(p))
             })
-            .forEach(t => {
-                console.log("Adding issue: " + prefix(t))
-                addTaskPromises.push(addIssueToOmniFocus(t))
+            .forEach(iss => console.log("Adding issue: " + prefix(iss)))
+            .map(iss => {
+                const taskName = prefix(iss) + " " + iss.title
+                const taskURL = iss.html_url
+                return addNewTask('GitHub Issues', taskName, "github", taskURL)
             })
-        // console.log(addTaskPromises)
+
         console.log("Waiting for " + addTaskPromises.length + " tasks to be added...")
         await Promise.all(addTaskPromises).then(() => {
             console.log("Issues added!")
