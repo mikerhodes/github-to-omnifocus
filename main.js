@@ -111,12 +111,13 @@ async function main() {
         state: "open"
     })
 
-    tasksForProject('GitHub Issues')
-        .then(result => {
-            var tasks = result.map(t => t.name)
-            addNewIssues(tasks, issues)
-            completeMissingIssues(result, issues)
-        });
+    const tasks = await tasksForProject('GitHub Issues')
+
+    await addNewIssues(tasks.map(t => t.name), issues)
+    console.log("Issues added!")
+
+    await completeMissingIssues(tasks, issues)
+    console.log("Issues removed!")
 }
 
 /**
@@ -146,9 +147,7 @@ async function addNewIssues(currentTasks, issues) {
             })
 
         console.log("Waiting for " + addTaskPromises.length + " tasks to be added...")
-        await Promise.all(addTaskPromises).then(() => {
-            console.log("Issues added!")
-        })
+        return Promise.all(addTaskPromises)
 
     } catch (err) {
         console.error(err.message)
@@ -181,9 +180,7 @@ async function completeMissingIssues(currentTasks, issues) {
             })
 
         console.log(`Waiting for ${removeTaskPromises.length} tasks to be completed...`)
-        await Promise.all(removeTaskPromises).then(() => {
-            console.log("Issues removed!")
-        })
+        return Promise.all(removeTaskPromises)
     } catch (err) {
         console.log(err);
     }
