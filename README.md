@@ -48,3 +48,7 @@ auth_token = "developertoken"
 - OF JS examples
     - <https://github.com/nickrobinson/omnifocus/blob/master/index.js>
     - <https://github.com/linclark/omnifocus-github/blob/master/cli.js>
+- Launchd
+    - Running a job periodically section at <https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html>
+    - User's agents live at `~/Library/LaunchAgents`
+    - https://www.launchd.info/
