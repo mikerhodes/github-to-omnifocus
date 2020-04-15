@@ -107,21 +107,61 @@ async function main() {
         log: console,
     })
 
+    // Get issues and transform to standard form for tasks in "GitHub Issues" project
     try {
-
-        var issues = await octokit.issues.list({
+        const prefix = iss => iss.repository.full_name + "#" + iss.number
+        const results = await octokit.issues.list({
             filter: "assigned",
             state: "open"
         })
+        const issues = results.data.map(iss => {
+            return {
+                prefix: prefix(iss),
+                title: `${prefix(iss)} ${iss.title}`,
+                body: iss.html_url,
+            }
+        })
+
+        console.log(`Found ${issues.length} assigned issues.`)
 
         const tasks = await tasksForProject('GitHub Issues')
 
-        await addNewIssues(tasks.map(t => t.name), issues)
+        await addNewIssues('GitHub Issues', tasks.map(t => t.name), issues)
         console.log("Issues added!")
 
         await completeMissingIssues(tasks, issues)
         console.log("Issues removed!")
 
+    } catch (err) {
+        console.error(err)
+    }
+
+    // Get PRs and transform to standard form for tasks in "GitHub PRs" project
+    try {
+        const prefix = t => { // pull the org and repo from the html_url via regex
+            const m = t.html_url.match(/^https:\/\/github[^\0]ibm[^\0]com\/([^\/]+)\/([^\/]+)/m)
+            return `${m[1]}/${m[2]}#${t.number}`
+        }
+        const results = await octokit.search.issuesAndPullRequests({
+            q: "type:pr org:cloudant state:open review-requested:mike-rhodes",
+        });
+        const prs = results.data.items.map(pr => {
+            return {
+                prefix: prefix(pr),
+                title: `${prefix(pr)} ${pr.title}`,
+                body: pr.html_url,
+            }
+        })
+
+        console.log(`Found ${prs.length} assigned PRs.`)
+
+        const tasks = await tasksForProject('GitHub PRs')
+
+        await addNewIssues('GitHub PRs', tasks.map(t => t.name), prs)
+        console.log("PRs added!")
+
+        await completeMissingIssues(tasks, prs)
+        console.log("PRs removed!")
     } catch (err) {
         console.error(err)
     }
@@ -131,26 +171,25 @@ async function main() {
  * addNewIssues makes new tasks for `issues` which have no task in
  * `currentTasks`.
  * @param {object} currentTasks {id, name}
- * @param {object} issues ghissue
+ * @param {object} issues {
+                prefix: prefix(x),
+                title: taskTitle(x),
+                body: taskBody(x),
+            }
  */
-async function addNewIssues(currentTasks, issues) {
-
-    const prefix = iss => iss.repository.full_name + "#" + iss.number
+async function addNewIssues(omnifocusProject, currentTasks, issues) {
 
     try {
         // Filter down list of active assigned issues to those which do
         // not have a corresponding task (via prefix matching). Add these
         // issues as new tasks.
-        const addTaskPromises = issues.data
+        const addTaskPromises = issues
             .filter(iss => {
-                const p = prefix(iss) // don't create new prefix for every some() check
-                return !currentTasks.some(e => e.startsWith(p))
+                return !currentTasks.some(e => e.startsWith(iss.prefix))
             })
             .map(iss => {
-                console.log("Adding issue: " + prefix(iss))
-                const taskName = prefix(iss) + " " + iss.title
-                const taskURL = iss.html_url
-                return addNewTask('GitHub Issues', taskName, "github", taskURL)
+                console.log("Adding issue: " + iss.prefix)
+                return addNewTask(omnifocusProject, iss.title, "github", iss.body)
             })
 
         console.log("Waiting for " + addTaskPromises.length + " tasks to be added...")
@@ -165,15 +204,18 @@ async function addNewIssues(currentTasks, issues) {
  * completeMissingIssues marks tasks in `currentTasks` complete which have
  * no corresponding issue in `issues`.
  * @param {object} currentTasks {id, name}
- * @param {object} issues ghissue
+ * @param {object} issues {
+                prefix: prefix(x),
+                title: taskTitle(x),
+                body: taskBody(x),
+            }
  */
 async function completeMissingIssues(currentTasks, issues) {
 
     // Generate list of prefixes that we use for tasks within
     // OmniFocus, which will allow us to figure out which tasks
     // are no longer in issues, so we can remove them.
-    const prefix = t => t.repository.full_name + "#" + t.number
-    const issuePrefixes = issues.data.map((t) => prefix(t))
+    const issuePrefixes = issues.map(iss => iss.prefix)
 
     try {
         // Filter down to list of tasks where there is no corresponding
