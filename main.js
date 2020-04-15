@@ -138,12 +138,14 @@ async function main() {
 
     // Get PRs and transform to standard form for tasks in "GitHub PRs" project
     try {
+        const user = await octokit.users.getAuthenticated()
+        const username = user.data.login
         const prefix = t => { // pull the org and repo from the html_url via regex
             const m = t.html_url.match(/^https:\/\/github[^\0]ibm[^\0]com\/([^\/]+)\/([^\/]+)/m)
             return `${m[1]}/${m[2]}#${t.number}`
         }
         const results = await octokit.search.issuesAndPullRequests({
-            q: "type:pr org:cloudant state:open review-requested:mike-rhodes",
+            q: `type:pr org:cloudant state:open review-requested:${username}`,
         });
         const prs = results.data.items.map(pr => {
             return {
