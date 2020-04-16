@@ -1,98 +1,12 @@
 //@ts-check
 'use strict';
 
-const osa = require('osa2');
 const toml = require('toml');
 const fs = require('fs')
 const { Octokit } = require("@octokit/rest");
 const os = require('os')
 
-const getInboxTasks = osa(() => {
-    // @ts-ignore
-    var of = Application("OmniFocus")
-    of.includeStandardAdditions = true;
-    return of.defaultDocument
-        .inboxTasks()
-        .filter((task) => task.completed() === false)
-        .map((task) => {
-            return { "id": task.id(), "name": task.name() };
-        });
-})
-
-/**
- * addNewTask adds a new task in projectName with a `title`, primary `tag` and
- * note `taskNote`. It returns the id and name of the task:
- *
- *      { "id": task.id(), "name": task.name() }
- */
-const addNewTask = osa((projectName, title, tag, taskNote) => {
-
-    // @ts-ignore
-    const ofApp = Application("OmniFocus")
-    const ofDoc = ofApp.defaultDocument
-
-    // https://discourse.omnigroup.com/t/automatically-flag-tasks-in-specific-projects-contexts-according-to-due-defer-date/32093/28
-    const tagFoundOrCreated = charTag => {
-        const
-            tags = ofDoc.flattenedTags.whose({
-                name: charTag
-            }),
-            oTag = ofApp.Tag({
-                name: charTag
-            });
-        return tags.length === 0 ? (
-            (
-                ofDoc.tags.push(oTag),
-                oTag
-            )
-        ) : tags()[0]
-    }
-
-    const project = ofDoc.flattenedProjects
-        .whose({ name: projectName })[0];
-
-    var task = ofApp.Task({
-        "name": title,
-        "primaryTag": tagFoundOrCreated(tag),
-        "note": taskNote,
-    })
-    // ofDoc.inboxTasks.push(task)
-    project.tasks.push(task)
-    return { "id": task.id(), "name": task.name() };
-});
-
-/**
- * tasksForProject returns tasks for project `projectName` in the form:
- *
- *      { "id": task.id(), "name": task.name() }
- */
-const tasksForProject = osa((projectName) => {
-    // @ts-ignore
-    const ofApp = Application("OmniFocus")
-    const ofDoc = ofApp.defaultDocument
-    const project = ofDoc.flattenedProjects
-        .whose({ name: projectName })[0];
-
-    return project.tasks()
-        .filter((task) => task.completed() === false)
-        .map((task) => {
-            return { "id": task.id(), "name": task.name() };
-        });
-});
-
-/**
- * markTaskComplete marks a task with taskId complete.
- */
-const markTaskComplete = osa((taskId) => {
-    // @ts-ignore
-    const ofApp = Application("OmniFocus")
-    const task = ofApp.defaultDocument.flattenedTasks().filter(task => task.id() === taskId)
-    if (task) {
-        // @ts-ignore
-        return ofApp.markComplete(task)
-    }
-    return false
-});
+const omnifocus = require('./omnifocus')
 
 // PotentialTask is the internal representation of a potential task
 // to be added to OmniFocus.
@@ -121,25 +35,7 @@ class CurrentTask {
 
 async function main() {
 
-    var tomlConfig, config
-
-    var configFilePath = `${os.homedir()}/.github-to-omnifocus.toml`
-    console.log(`Reading config at ${configFilePath}...`)
-
-    try {
-        tomlConfig = fs.readFileSync(configFilePath, 'utf8')
-    } catch (err) {
-        console.error(err)
-        process.exit(1)
-    }
-
-    try {
-        config = toml.parse(tomlConfig);
-    } catch (e) {
-        console.error("Parsing error on line " + e.line + ", column " + e.column +
-            ": " + e.message);
-        process.exit(1)
-    }
+    const config = loadConfig()
 
     console.log("Config loaded.")
     console.log(`Using API server: ${config.github.api_url}`);
@@ -158,6 +54,7 @@ async function main() {
     })
 
     // Get issues and transform to standard form for tasks in "GitHub Issues" project
+    // TODO use octokit's paginate to get more than 30 results
     try {
         const results = await octokit.issues.list({
             filter: "assigned",
@@ -174,7 +71,7 @@ async function main() {
 
         console.log(`Found ${issues.length} assigned issues.`)
 
-        var tasks = await tasksForProject(omnifocusIssuesProject)
+        var tasks = await omnifocus.tasksForProject(omnifocusIssuesProject)
         tasks = tasks.map(t => {
             const task = new CurrentTask()
             task.id = t.id
@@ -193,6 +90,7 @@ async function main() {
     }
 
     // Get PRs and transform to standard form for tasks in "GitHub PRs" project
+    // TODO use octokit's paginate to get more than 30 results
     try {
         const user = await octokit.users.getAuthenticated()
         const username = user.data.login
@@ -213,7 +111,7 @@ async function main() {
 
         console.log(`Found ${prs.length} PRs to review.`)
 
-        var tasks = await tasksForProject(omnifocusPrsProject)
+        var tasks = await omnifocus.tasksForProject(omnifocusPrsProject)
         tasks = tasks.map(t => {
             const task = new CurrentTask()
             task.id = t.id
@@ -251,7 +149,7 @@ async function addNewIssues(omnifocusProject, ofTag, currentTasks, issues) {
             })
             .map(iss => {
                 console.log("Adding issue: " + iss.prefix)
-                return addNewTask(omnifocusProject, iss.title, ofTag, iss.body)
+                return omnifocus.addNewTask(omnifocusProject, iss.title, ofTag, iss.body)
             })
 
         console.log("Waiting for " + addTaskPromises.length + " tasks to be added...")
@@ -283,7 +181,7 @@ async function completeMissingIssues(currentTasks, issues) {
             .filter((t) => !issuePrefixes.some(e => t.title.startsWith(e)))
             .map((t) => {
                 console.log("Mark complete: " + t.title)
-                return markTaskComplete(t.id)
+                return omnifocus.markTaskComplete(t.id)
             })
 
         console.log(`Waiting for ${removeTaskPromises.length} tasks to be completed...`)
@@ -291,6 +189,30 @@ async function completeMissingIssues(currentTasks, issues) {
     } catch (err) {
         console.log(err);
     }
+}
+
+function loadConfig() {
+    var tomlConfig, config
+
+    var configFilePath = `${os.homedir()}/.github-to-omnifocus.toml`
+    console.log(`Reading config at ${configFilePath}...`)
+
+    try {
+        tomlConfig = fs.readFileSync(configFilePath, 'utf8')
+    } catch (err) {
+        console.error(err)
+        process.exit(1)
+    }
+
+    try {
+        config = toml.parse(tomlConfig);
+    } catch (e) {
+        console.error("Parsing error on line " + e.line + ", column " + e.column +
+            ": " + e.message);
+        process.exit(1)
+    }
+
+    return config
 }
 
 main()
