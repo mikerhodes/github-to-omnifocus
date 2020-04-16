@@ -195,7 +195,7 @@ async function addNewIssues(omnifocusProject, currentTasks, issues) {
             })
 
         console.log("Waiting for " + addTaskPromises.length + " tasks to be added...")
-        return Promise.all(addTaskPromises)
+        await Promise.all(addTaskPromises)
 
     } catch (err) {
         console.error(err.message)
@@ -227,11 +227,11 @@ async function completeMissingIssues(currentTasks, issues) {
             .filter((t) => !issuePrefixes.some(e => t.name.startsWith(e)))
             .map((t) => {
                 console.log("Mark complete: " + t.name)
-                markTaskComplete(t.id)
+                return markTaskComplete(t.id)
             })
 
         console.log(`Waiting for ${removeTaskPromises.length} tasks to be completed...`)
-        return Promise.all(removeTaskPromises)
+        await Promise.all(removeTaskPromises)
     } catch (err) {
         console.log(err);
     }
