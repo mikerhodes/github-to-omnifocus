@@ -1,3 +1,4 @@
+//@ts-check
 'use strict';
 
 const osa = require('osa2');
@@ -7,6 +8,7 @@ const { Octokit } = require("@octokit/rest");
 const os = require('os')
 
 const getInboxTasks = osa(() => {
+    // @ts-ignore
     var of = Application("OmniFocus")
     of.includeStandardAdditions = true;
     return of.defaultDocument
@@ -17,8 +19,15 @@ const getInboxTasks = osa(() => {
         });
 })
 
+/**
+ * addNewTask adds a new task in projectName with a `title`, primary `tag` and
+ * note `taskNote`. It returns the id and name of the task:
+ *
+ *      { "id": task.id(), "name": task.name() }
+ */
 const addNewTask = osa((projectName, title, tag, taskNote) => {
 
+    // @ts-ignore
     const ofApp = Application("OmniFocus")
     const ofDoc = ofApp.defaultDocument
 
@@ -52,7 +61,13 @@ const addNewTask = osa((projectName, title, tag, taskNote) => {
     return { "id": task.id(), "name": task.name() };
 });
 
+/**
+ * tasksForProject returns tasks for project `projectName` in the form:
+ *
+ *      { "id": task.id(), "name": task.name() }
+ */
 const tasksForProject = osa((projectName) => {
+    // @ts-ignore
     const ofApp = Application("OmniFocus")
     const ofDoc = ofApp.defaultDocument
     const project = ofDoc.flattenedProjects
@@ -65,13 +80,43 @@ const tasksForProject = osa((projectName) => {
         });
 });
 
+/**
+ * markTaskComplete marks a task with taskId complete.
+ */
 const markTaskComplete = osa((taskId) => {
-    const task = Application('OmniFocus').defaultDocument.flattenedTasks().filter(task => task.id() === taskId)
+    // @ts-ignore
+    const ofApp = Application("OmniFocus")
+    const task = ofApp.defaultDocument.flattenedTasks().filter(task => task.id() === taskId)
     if (task) {
-        return Application('OmniFocus').markComplete(task)
+        // @ts-ignore
+        return ofApp.markComplete(task)
     }
     return false
 });
+
+// PotentialTask is the internal representation of a potential task
+// to be added to OmniFocus.
+class PotentialTask {
+    constructor() {
+        /** @type {string} */
+        this.prefix;
+        /** @type {string} */
+        this.title;
+        /** @type {string} */
+        this.body;
+    }
+}
+
+// CurrentTask is the internal representation of a current task
+// from OmniFocus.
+class CurrentTask {
+    constructor() {
+        /** @type {string} */
+        this.id;
+        /** @type {string} */
+        this.title;
+    }
+}
 
 
 async function main() {
@@ -100,6 +145,11 @@ async function main() {
     console.log(`Using API server: ${config.github.api_url}`);
     console.log(`Using token: ${config.github.auth_token}`);
 
+    // TODO make config items?
+    const newTaskTag = "github";
+    const omnifocusPrsProject = 'GitHub PRs';
+    const omnifocusIssuesProject = 'GitHub Issues';
+
     const octokit = new Octokit({
         auth: config.github.auth_token, // token
         userAgent: "github-to-omnifocus/1.0.0",
@@ -109,24 +159,30 @@ async function main() {
 
     // Get issues and transform to standard form for tasks in "GitHub Issues" project
     try {
-        const prefix = iss => iss.repository.full_name + "#" + iss.number
         const results = await octokit.issues.list({
             filter: "assigned",
             state: "open"
         })
         const issues = results.data.map(iss => {
-            return {
-                prefix: prefix(iss),
-                title: `${prefix(iss)} ${iss.title}`,
-                body: iss.html_url,
-            }
+            const prefix = iss.repository.full_name + "#" + iss.number
+            const potentialTask = new PotentialTask()
+            potentialTask.prefix = prefix
+            potentialTask.title = `${prefix} ${iss.title}`
+            potentialTask.body = iss.html_url
+            return potentialTask
         })
 
         console.log(`Found ${issues.length} assigned issues.`)
 
-        const tasks = await tasksForProject('GitHub Issues')
+        var tasks = await tasksForProject(omnifocusIssuesProject)
+        tasks = tasks.map(t => {
+            const task = new CurrentTask()
+            task.id = t.id
+            task.title = t.name
+            return task
+        })
 
-        await addNewIssues('GitHub Issues', tasks.map(t => t.name), issues)
+        await addNewIssues(omnifocusIssuesProject, newTaskTag, tasks, issues)
         console.log("Issues added!")
 
         await completeMissingIssues(tasks, issues)
@@ -148,18 +204,24 @@ async function main() {
             q: `type:pr org:cloudant state:open review-requested:${username}`,
         });
         const prs = results.data.items.map(pr => {
-            return {
-                prefix: prefix(pr),
-                title: `${prefix(pr)} ${pr.title}`,
-                body: pr.html_url,
-            }
+            const potentialTask = new PotentialTask()
+            potentialTask.prefix = prefix(pr)
+            potentialTask.title = `${prefix(pr)} ${pr.title}`
+            potentialTask.body = pr.html_url
+            return potentialTask
         })
 
-        console.log(`Found ${prs.length} assigned PRs.`)
+        console.log(`Found ${prs.length} PRs to review.`)
 
-        const tasks = await tasksForProject('GitHub PRs')
+        var tasks = await tasksForProject(omnifocusPrsProject)
+        tasks = tasks.map(t => {
+            const task = new CurrentTask()
+            task.id = t.id
+            task.title = t.name
+            return task
+        })
 
-        await addNewIssues('GitHub PRs', tasks.map(t => t.name), prs)
+        await addNewIssues(omnifocusPrsProject, newTaskTag, tasks, prs)
         console.log("PRs added!")
 
         await completeMissingIssues(tasks, prs)
@@ -172,14 +234,12 @@ async function main() {
 /**
  * addNewIssues makes new tasks for `issues` which have no task in
  * `currentTasks`.
- * @param {object} currentTasks {id, name}
- * @param {object} issues {
-                prefix: prefix(x),
-                title: taskTitle(x),
-                body: taskBody(x),
-            }
+ * @param {string} [omnifocusProject]
+ * @param {string} ofTag
+ * @param {CurrentTask[]} [currentTasks] {id, name}
+ * @param {PotentialTask[]} [issues]
  */
-async function addNewIssues(omnifocusProject, currentTasks, issues) {
+async function addNewIssues(omnifocusProject, ofTag, currentTasks, issues) {
 
     try {
         // Filter down list of active assigned issues to those which do
@@ -187,11 +247,11 @@ async function addNewIssues(omnifocusProject, currentTasks, issues) {
         // issues as new tasks.
         const addTaskPromises = issues
             .filter(iss => {
-                return !currentTasks.some(e => e.startsWith(iss.prefix))
+                return !currentTasks.some(e => e.title.startsWith(iss.prefix))
             })
             .map(iss => {
                 console.log("Adding issue: " + iss.prefix)
-                return addNewTask(omnifocusProject, iss.title, "github", iss.body)
+                return addNewTask(omnifocusProject, iss.title, ofTag, iss.body)
             })
 
         console.log("Waiting for " + addTaskPromises.length + " tasks to be added...")
@@ -205,12 +265,8 @@ async function addNewIssues(omnifocusProject, currentTasks, issues) {
 /**
  * completeMissingIssues marks tasks in `currentTasks` complete which have
  * no corresponding issue in `issues`.
- * @param {object} currentTasks {id, name}
- * @param {object} issues {
-                prefix: prefix(x),
-                title: taskTitle(x),
-                body: taskBody(x),
-            }
+ * @param {CurrentTask[]} [currentTasks] {id, name}
+ * @param {PotentialTask[]} [issues]
  */
 async function completeMissingIssues(currentTasks, issues) {
 
@@ -224,9 +280,9 @@ async function completeMissingIssues(currentTasks, issues) {
         // issue currently assigned to us via prefix matching, then
         // mark them complete.
         var removeTaskPromises = currentTasks
-            .filter((t) => !issuePrefixes.some(e => t.name.startsWith(e)))
+            .filter((t) => !issuePrefixes.some(e => t.title.startsWith(e)))
             .map((t) => {
-                console.log("Mark complete: " + t.name)
+                console.log("Mark complete: " + t.title)
                 return markTaskComplete(t.id)
             })
 
