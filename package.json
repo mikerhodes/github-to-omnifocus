@@ -1,6 +1,6 @@
 {
   "name": "@mikerhodes/github-to-omnifocus",
-  "version": "1.0.1",
+  "version": "1.1.1",
   "description": "Import GitHub Issues into Omnifocus",
   "main": "main.js",
   "scripts": {
