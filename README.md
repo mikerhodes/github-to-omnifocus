@@ -91,3 +91,8 @@ pr_project = "GitHub PRs"
     supported right now.
 - The `api_url` for a GitHub Enterprise install will look something like
     `https://github.mycompany.com/api/v3`.
+
+## Known Issues
+
+See the [Issues](https://github.com/mikerhodes/github-to-omnifocus/issues) in
+this repository.
