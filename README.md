@@ -49,16 +49,16 @@ within a generic project -- something along the lines of using
 
 ### Set up github-to-omnifocus.toml
 
-Create `~/.github-to-omnifocus.toml`. This must contain a value for `auth_token`
-file in the `[github]` table:
+Create `~/.github-to-omnifocus.toml`. This must contain a value for the
+`auth_token` field in the `[github]` table:
 
 ```toml
 [github]
 auth_token = "myauthtoken"  # App will fail to launch if this isn't set
 ```
 
-Auth token can be generated at https://github.com/settings/tokens. They should
-have `notifications`, `repo` and `user` scope. Strictly `notifications` is
+Auth tokens can be generated at https://github.com/settings/tokens. They need
+the `notifications`, `repo` and `user` scopes. Strictly `notifications` is
 not required, but it's a feature I'd like to add.
 
 ### Run github-to-omnifocus
