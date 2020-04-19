@@ -8,9 +8,10 @@ A node.js application that adds Omnifocus tasks for:
 If an issue or PR is closed or not assigned to you any more, it will be marked
 complete within Omnifocus.
 
-Supported versions of Omnifocus:
+## Supported versions of Omnifocus
 
 - Tested with **Omnifocus 3.6.3**.
+- Requires Professional edition for automation support.
 
 ## How tasks are associated with GitHub resources
 
