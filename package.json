@@ -1,11 +1,11 @@
 {
-  "name": "github-omnifocus",
+  "name": "@mikerhodes/github-to-omnifocus",
   "version": "1.0.0",
   "description": "Import GitHub Issues into Omnifocus",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "github-to-omnifocus": "bin/main.js"
+    "github-to-omnifocus": "bin/github-to-omnifocus"
   },
   "author": "Mike Rhodes",
   "license": "ISC",
@@ -16,6 +16,22 @@
     "toml": "^3.0.0"
   },
   "bin": {
-    "github-to-omnifocus": "bin/main.js"
-  }
+    "github-to-omnifocus": "bin/github-to-omnifocus"
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikerhodes/github-to-omnifocus.git"
+  },
+  "keywords": [
+    "github",
+    "omnifocus"
+  ],
+  "bugs": {
+    "url": "https://github.com/mikerhodes/github-to-omnifocus/issues"
+  },
+  "homepage": "https://github.com/mikerhodes/github-to-omnifocus#readme"
 }

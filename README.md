@@ -1,8 +1,5 @@
 # Add GitHub Issues to Omnifocus
 
-A script to add GitHub issues that are assigned to you to your
-Omnifocus task list.
-
 A node.js application that adds Omnifocus tasks for:
 
 - GitHub Issues assigned to you.
