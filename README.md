@@ -28,11 +28,12 @@ supports using the same project for both, and it will avoid affecting tasks
 that it didn't create itself, meaning it can share a project with other tasks.
 
 To avoid affecting tasks that it doesn't "own", when `github-to-omnifocus`
-creates tasks they are given the tag `github-to-omnifocus` (can be changed via
+creates tasks they are given the tag `github` (can be changed via
 configuration). Further, they are given a "type tag" to differentiate whether
 they are issues, PRs or whatever. Using tags in this manner allows
 `github-to-omnifocus` to live alongside other tasks within the projects it is
-using.
+using. `github-to-omnifocus` will only ever mark tasks complete that are in
+the configured projects _and_ have the appropriate tags.
 
 Within the tasks it owns, `github-to-omnifocus` associates a task with its
 corresponding GitHub issue or PR using a prefix on each task:
@@ -60,7 +61,7 @@ with your workflow, it's time to get started:
 
 By default, `github-to-omnifocus` will put Issues assigned to you in the
 `GitHub Issues` project. It will put PRs in the `GitHub PRs` project. It will
-also apply the `github-to-omnifocus` tag and a "type" tag to indicate whether
+also apply the `github` tag and a "type" tag to indicate whether
 the task is an issue or PR. The projects are not auto-created and must exist:
 
 1. Create `GitHub Issues` project in Omnifocus. This can be nested within
@@ -108,11 +109,16 @@ api_url = "https://api.github.com"  # Change when using GitHub Enterprise
 auth_token = ""
 
 [omnifocus]
-app_tag = "github-to-omnifocus"     # Used by app to find its own tasks
+app_tag = "github"                  # Used by app to find its own tasks
 issue_project = "GitHub Issues"
 pr_project = "GitHub PRs"
 ```
 
+- If you use `github` as a tag in other contexts, you may want to change
+    the `app_tag` value. Strictly, this is only required if other tasks
+    with the `github` tag will be found within the projects that
+    `github-to-omnifocus` are using -- both project and tag are considered
+    for whether `github-to-omnifocus` "owns" a task and so may modify it.
 - The `issue_project` and `pr_project` can be the same project and can also
     be used for other tasks -- `github-to-omnifocus` uses the `app_tag` and
     two internal tags to find the tasks it "owns" and which type they are.
