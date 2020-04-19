@@ -96,12 +96,15 @@ Run using:
 npx @mikerhodes/github-to-omnifocus sync
 ```
 
+`npx` is included with `npm` so you probably have it installed. It will run
+the application _without_ leaving any installed files on your system.
+
 ## Other configuration values
 
-There are several other options that can be set in this file. The following
-values are the defaults; you can leave out these values if they are correct for
-your use-case. As mentioned, the only value that must be specified is
-`auth_token`.
+There are several other options that can be set in
+`~/.github-to-omnifocus.toml`. The following values are the defaults; you can
+leave out these values if they are correct for your use-case. As mentioned, the
+only value that must be specified is `auth_token`.
 
 ```toml
 [github]
