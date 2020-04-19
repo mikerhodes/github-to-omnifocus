@@ -4,13 +4,18 @@
   "description": "Import GitHub Issues into Omnifocus",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "github-to-omnifocus": "bin/main.js"
   },
   "author": "Mike Rhodes",
   "license": "ISC",
   "dependencies": {
     "@octokit/rest": "^17.2.1",
+    "commander": "^5.0.0",
     "osa2": "^0.2.3",
     "toml": "^3.0.0"
+  },
+  "bin": {
+    "github-to-omnifocus": "bin/main.js"
   }
 }
