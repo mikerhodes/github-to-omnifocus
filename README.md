@@ -5,6 +5,17 @@ A node.js application that adds Omnifocus tasks for:
 - GitHub Issues assigned to you.
 - GitHub PRs where your review has been requested.
 
+If an issue or PR is closed or not assigned to you any more, it will be marked
+complete within Omnifocus.
+
+Tasks are created using the form:
+
+```
+myorg/myrepo#123 My issue title
+```
+
+The `myorg/myrepo#123` the key that links task and issue/PR.
+
 ## Using
 
 Create `~/.github-to-omnifocus.toml`. This must contain a value for `auth_token`
