@@ -82,7 +82,7 @@ api_url = "https://api.github.com"  # Change when using GitHub Enterprise
 auth_token = ""
 
 [omnifocus]
-tag = "github"
+tag = "github-to-omnifocus"         # Used by app to find its own tasks
 issue_project = "GitHub Issues"
 pr_project = "GitHub PRs"
 ```
