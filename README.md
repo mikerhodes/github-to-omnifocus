@@ -14,7 +14,7 @@ Tasks are created using the form:
 myorg/myrepo#123 My issue title
 ```
 
-The `myorg/myrepo#123` the key that links task and issue/PR.
+The `myorg/myrepo#123` is the key that links tasks to their issues/PRs.
 
 ## Using
 
