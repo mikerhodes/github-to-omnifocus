@@ -1,4 +1,4 @@
-# Add GitHub Issues to Omnifocus
+# Add your GitHub Issues and PRs to Omnifocus
 
 A node.js application that adds Omnifocus tasks for:
 
