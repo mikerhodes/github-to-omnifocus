@@ -53,8 +53,10 @@ Now you know how `github-to-omnifocus` works and have figured whether it'll work
 with your workflow, it's time to get started:
 
 1. Set up Omnifocus projects.
-2. Set up application configuration.
-3. Run `github-to-omnifocus` via `npx` (included with `npm`), which will run
+1. Create a personal developer token on GitHub for `github-to-omnifocus` to use
+    when making requests to GitHub's API.
+1. Set up application configuration.
+1. Run `github-to-omnifocus` via `npx` (included with `npm`), which will run
     the application _without_ leaving any installed files on your system.
 
 ### Set up Omnifocus projects
@@ -72,6 +74,16 @@ the task is an issue or PR. The projects are not auto-created and must exist:
 Note: if you set up different project names in `github-to-omnifocus.toml`,
 ensure that you create projects with those names.
 
+### Create GitHub personal developer token
+
+- Open https://github.com/settings/tokens (or the equivalent on your GitHub
+    Enterprise instance).
+- Generate a new token with the following scopes:
+    - `repo`
+    - `user`
+    - `notifications` - optional, I haven't written a notifications feature yet,
+        but I'd like to.
+
 ### Set up application configuration (.github-to-omnifocus.toml)
 
 Create `~/.github-to-omnifocus.toml`. This must contain a value for the
@@ -83,10 +95,6 @@ Enterprise server.
 [github]
 auth_token = "myauthtoken"  # App will fail to launch if this isn't set
 ```
-
-Auth tokens can be generated at https://github.com/settings/tokens. They need
-the `notifications`, `repo` and `user` scopes. Strictly `notifications` is
-not required, but it's a feature I'd like to add.
 
 ### Run github-to-omnifocus using npx
 
