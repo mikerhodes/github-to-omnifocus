@@ -1,6 +1,6 @@
 {
   "name": "@mikerhodes/github-to-omnifocus",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Import GitHub Issues into Omnifocus",
   "main": "main.js",
   "scripts": {
@@ -12,7 +12,7 @@
   "dependencies": {
     "@octokit/rest": "^17.2.1",
     "commander": "^5.0.0",
-    "osa2": "^0.2.3",
+    "osa2": "==0.2.2",
     "toml": "^3.0.0"
   },
   "bin": {
