@@ -81,8 +81,7 @@ ensure that you create projects with those names.
 - Generate a new token with the following scopes:
     - `repo`
     - `user`
-    - `notifications` - optional, I haven't written a notifications feature yet,
-        but I'd like to.
+    - `notifications`
 
 ### Set up application configuration (.github-to-omnifocus.toml)
 
@@ -123,6 +122,7 @@ auth_token = ""
 app_tag = "github"                  # Used by app to find its own tasks
 assigned_project = "GitHub Assigned"
 review_project = "GitHub Reviews"
+notifications_project = "GitHub Notifications"
 ```
 
 - If you use `github` as a tag in other contexts, you may want to change
