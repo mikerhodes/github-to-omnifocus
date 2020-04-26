@@ -2,7 +2,7 @@
 
 const { program } = require('commander');
 
-program.version(process.env.npm_package_version);
+program.version(require('../package.json').version);
 
 program
     .command('sync')
