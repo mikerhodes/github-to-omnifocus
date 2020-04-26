@@ -2,7 +2,7 @@
 
 A node.js application that adds Omnifocus tasks for:
 
-- GitHub Issues assigned to you.
+- GitHub Issues and PRs assigned to you.
 - GitHub PRs where your review has been requested.
 
 If an issue or PR is closed or not assigned to you any more, it will be marked
@@ -98,7 +98,7 @@ auth_token = "myauthtoken"  # App will fail to launch if this isn't set
 
 ### Run github-to-omnifocus using npx
 
-Run using:
+Ensure Omnifocus is open. Then run using:
 
 ```
 npx @mikerhodes/github-to-omnifocus sync
@@ -121,8 +121,8 @@ auth_token = ""
 
 [omnifocus]
 app_tag = "github"                  # Used by app to find its own tasks
-issue_project = "GitHub Issues"
-pr_project = "GitHub PRs"
+assigned_project = "GitHub Assigned"
+review_project = "GitHub Reviews"
 ```
 
 - If you use `github` as a tag in other contexts, you may want to change
