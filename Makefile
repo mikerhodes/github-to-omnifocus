@@ -11,4 +11,5 @@ version-patch:
 	npm version patch
 
 .PHONY: version-minor
+version-minor:
 	npm version minor
