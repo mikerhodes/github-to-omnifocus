@@ -1,3 +1,5 @@
+1.6.0 2020-05-27
+    - Add direct link to latest comment to notifications.
 1.3.1 2020-04-24
     - Fix a bug where PRs were assumed to be in an internal GitHub instance.
 1.3.0 2020-04-20
