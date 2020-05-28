@@ -1,3 +1,5 @@
+1.6.1 2020-05-28
+    - Fix exception when notification does not have a latest comment field
 1.6.0 2020-05-27
     - Add direct link to latest comment to notifications.
 1.3.1 2020-04-24
