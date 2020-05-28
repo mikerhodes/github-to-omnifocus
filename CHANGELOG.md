@@ -1,3 +1,5 @@
+1.6.2 2020-05-28
+    - Refactor notifications code to be simpler.
 1.6.1 2020-05-28
     - Fix exception when notification does not have a latest comment field
 1.6.0 2020-05-27
