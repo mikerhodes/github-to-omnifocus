@@ -1,3 +1,5 @@
+1.6.3 2020-05-29
+    - Fix a bug when receiving notifications for closed issues.
 1.6.2 2020-05-28
     - Refactor notifications code to be simpler.
 1.6.1 2020-05-28
