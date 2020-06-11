@@ -1,3 +1,7 @@
+1.6.4 2020-06-11
+    - Fix a bug when attempting to retrieve a comment for a notification
+        received a 404 from GitHub and we failed to continue processing later
+        notifications. Fallback to getting issue itself.
 1.6.3 2020-05-29
     - Fix a bug when receiving notifications for closed issues.
 1.6.2 2020-05-28
