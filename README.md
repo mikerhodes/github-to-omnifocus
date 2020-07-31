@@ -6,6 +6,8 @@ A node.js application that adds Omnifocus tasks for:
 - GitHub PRs where your review has been requested.
 - Notifications you have received.
 
+Notifications and Review Requests will gain a due date of today.
+
 If an issue or PR is closed or not assigned to you any more, it will be marked
 complete within Omnifocus.
 

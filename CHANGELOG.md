@@ -1,3 +1,5 @@
+1.7.0 2020-07-31
+    - Add due dates to notifications and reviews.
 1.6.4 2020-06-11
     - Fix a bug when attempting to retrieve a comment for a notification
         received a 404 from GitHub and we failed to continue processing later
