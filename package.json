@@ -1,6 +1,6 @@
 {
   "name": "@mikerhodes/github-to-omnifocus",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Import GitHub Issues into Omnifocus",
   "main": "main.js",
   "scripts": {
@@ -10,8 +10,8 @@
   "author": "Mike Rhodes",
   "license": "ISC",
   "dependencies": {
-    "@octokit/rest": "^17.2.1",
-    "commander": "^5.0.0",
+    "@octokit/rest": "^17.11.2",
+    "commander": "^5.1.0",
     "osa2": "==0.2.2",
     "toml": "^3.0.0"
   },
