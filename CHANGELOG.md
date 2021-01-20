@@ -1,3 +1,5 @@
+1.8.0 2021-01-20
+    - #2 Paginate queries to retrieve all items.
 1.7.0 2020-07-31
     - Add due dates to notifications and reviews.
 1.6.4 2020-06-11
