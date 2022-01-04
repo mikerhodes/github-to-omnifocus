@@ -1,15 +1,12 @@
-.PHONY: run
-run:
-	npm run github-to-omnifocus sync
+.PHONY: build run test
 
-.PHONY: publish
-publish:
-	npm publish --access public
+PROJECT_VERSION=v2.0
 
-.PHONY: version-patch
-version-patch:
-	npm version patch
+run: build
+	./github2omnifocus
 
-.PHONY: version-minor
-version-minor:
-	npm version minor
+build:
+	go build -ldflags="-X 'main.Version=$(PROJECT_VERSION)'" ./cmd/github2omnifocus
+
+test:
+	go test ./...
