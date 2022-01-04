@@ -1,3 +1,5 @@
+v2.0
+    - Rewrite in Go.
 1.8.0 2021-01-20
     - #2 Paginate queries to retrieve all items.
 1.7.0 2020-07-31

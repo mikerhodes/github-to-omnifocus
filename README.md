@@ -1,6 +1,6 @@
 # Add your GitHub Issues and PRs to Omnifocus
 
-A node.js application that adds Omnifocus tasks for:
+A Go application that adds Omnifocus tasks for:
 
 - GitHub Issues and PRs assigned to you.
 - GitHub PRs where your review has been requested.
@@ -64,18 +64,15 @@ with your workflow, it's time to get started:
 
 ### Set up Omnifocus projects
 
-By default, `github-to-omnifocus` will put Issues assigned to you in the
-`GitHub Issues` project. It will put PRs in the `GitHub PRs` project. It will
-also apply the `github` tag and a "type" tag to indicate whether
-the task is an issue or PR. The projects are not auto-created and must exist:
+By default, the application uses the following projects, which must be created
+manually:
 
-1. Create `GitHub Issues` project in Omnifocus. This can be nested within
-    folders.
-1. Create `GitHub PRs` project in Omnifocus. This can be nested within
-    folders.
+- "GitHub Assigned"
+- "GitHub Reviews"
+- "GitHub Notifications"
 
-Note: if you set up different project names in `github-to-omnifocus.toml`,
-ensure that you create projects with those names.
+These projects can be nested within folders. The names can be customised in the
+configuration file.
 
 ### Create GitHub personal developer token
 
@@ -88,56 +85,61 @@ ensure that you create projects with those names.
 
 ### Set up application configuration (.github-to-omnifocus.toml)
 
-Create `~/.github-to-omnifocus.toml`. This must contain a value for the
-`auth_token` field in the `[github]` table, which is used for API calls to
-GitHub. See below for how to configure `github-to-omnifocus` to use a GitHub
-Enterprise server.
+Create `~/.config/github2omnifocus/config.json`. This must contain a value for
+the `AccessToken` field, which is used for API calls to GitHub. See below for
+how to configure `github2omnifocus` to use a GitHub Enterprise server.
 
-```toml
-[github]
-auth_token = "myauthtoken"  # App will fail to launch if this isn't set
+```json
+{
+    "AccessToken": "my_personal_access_token"
+}
 ```
 
-### Run github-to-omnifocus using npx
+#### GitHub Enterprise
+
+Add an `APIURL` field to your configuration to get the application to connect
+to GitHub Enterprise:
+
+```json
+{
+    "APIURL": "https://github.mycompany.com/api/v3",
+    "AccessToken": "my_personal_access_token"
+}
+```
+
+### Run github-to-omnifocus
 
 Ensure Omnifocus is open. Then run using:
 
 ```
-npx @mikerhodes/github-to-omnifocus sync
+make run
 ```
-
-`npx` is included with `npm` so you probably have it installed. It will run
-the application _without_ leaving any installed files on your system.
 
 ## Other configuration values
 
 There are several other options that can be set in
-`~/.github-to-omnifocus.toml`. The following values are the defaults; you can
-leave out these values if they are correct for your use-case. As mentioned, the
-only value that must be specified is `auth_token`.
+`~/.config/github2omnifocus/config.json`. The following values are the
+defaults; you can leave out these values if they are correct for your use-case.
+As mentioned, the only value that must be specified is `AccessToken`.
 
-```toml
-[github]
-api_url = "https://api.github.com"  # Change when using GitHub Enterprise
-auth_token = ""
-
-[omnifocus]
-app_tag = "github"                  # Used by app to find its own tasks
-assigned_project = "GitHub Assigned"
-review_project = "GitHub Reviews"
-notifications_project = "GitHub Notifications"
+```json
+{
+    "APIURL": "https://api.github.com",
+    "AccessToken": "",
+    "AppTag": "github",
+    "AssignedProject": "GitHub Assigned",
+    "ReviewProject": "GitHub Reviews",
+    "NotificationsProject": "GitHub Notifications",
+}
 ```
 
-- If you use `github` as a tag in other contexts, you may want to change
-    the `app_tag` value. Strictly, this is only required if other tasks
-    with the `github` tag will be found within the projects that
-    `github-to-omnifocus` are using -- both project and tag are considered
-    for whether `github-to-omnifocus` "owns" a task and so may modify it.
-- The `issue_project` and `pr_project` can be the same project and can also
-    be used for other tasks -- `github-to-omnifocus` uses the `app_tag` and
-    two internal tags to find the tasks it "owns" and which type they are.
-- The `api_url` for a GitHub Enterprise install will look something like
-    `https://github.mycompany.com/api/v3`.
+- Change `APIURL` when using GitHub Enterprise, `https://github.mycompany.com/api/v3`.
+- `AppTag` is used by the application to identify tasks that it owns, and so can
+    update, complete and so on. It should not be used otherwise.
+- The `*Project` configurations are used to alter the project used for tasks
+    for each type of task that the application creates. The project need not
+    be unique for each type of task, and it isn't necessary to give the
+    app its "own" projects as it uses tags to identify its own tasks.
 
 ## Known Issues
 
