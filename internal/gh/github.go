@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/google/go-github/v41/github"
@@ -23,9 +22,7 @@ type GitHubItem struct {
 	Title   string
 	HTMLURL string
 	APIURL  string
-	// Repository is the full `mikerhodes/github-to-omnifocus` style identifier
-	Repository string
-	ID         int
+	K       string
 }
 
 func (item GitHubItem) String() string {
@@ -36,7 +33,7 @@ func (item GitHubItem) String() string {
 // github2omnifocus. For the desired state, this is a unique key for
 // the item derived from the GitHub data.
 func (item GitHubItem) Key() string {
-	return fmt.Sprintf("%s#%d", item.Repository, item.ID)
+	return item.K
 }
 
 type GitHubGateway struct {
@@ -89,11 +86,10 @@ func (ghg *GitHubGateway) GetIssues() ([]GitHubItem, error) {
 	items := []GitHubItem{}
 	for _, issue := range issues {
 		item := GitHubItem{
-			Title:      strings.TrimSpace(issue.GetTitle()),
-			HTMLURL:    issue.GetHTMLURL(),
-			APIURL:     issue.GetURL(),
-			Repository: issue.GetRepository().GetFullName(),
-			ID:         issue.GetNumber(),
+			Title:   strings.TrimSpace(issue.GetTitle()),
+			HTMLURL: issue.GetHTMLURL(),
+			APIURL:  issue.GetURL(),
+			K:       fmt.Sprintf("%s#%d", issue.GetRepository().GetFullName(), issue.GetNumber()),
 		}
 		items = append(items, item)
 	}
@@ -128,11 +124,10 @@ func (ghg *GitHubGateway) GetPRs() ([]GitHubItem, error) {
 	items := []GitHubItem{}
 	for _, issue := range issues {
 		item := GitHubItem{
-			Title:      strings.TrimSpace(issue.GetTitle()),
-			HTMLURL:    issue.GetHTMLURL(),
-			APIURL:     issue.GetURL(),
-			Repository: issue.GetRepository().GetFullName(),
-			ID:         issue.GetNumber(),
+			Title:   strings.TrimSpace(issue.GetTitle()),
+			HTMLURL: issue.GetHTMLURL(),
+			APIURL:  issue.GetURL(),
+			K:       fmt.Sprintf("%s#%d", issue.GetRepository().GetFullName(), issue.GetNumber()),
 		}
 		items = append(items, item)
 	}
@@ -165,14 +160,25 @@ func (ghg *GitHubGateway) GetNotifications() ([]GitHubItem, error) {
 	items := []GitHubItem{}
 	for _, notification := range notifications {
 
-		// notification.Subject.GetURL() is ${baseUrl}/repos/cloudant/infra/issues/1500
+		// notification.Subject.GetURL() is
+		// - ${baseUrl}/repos/cloudant/infra/issues/1500
+		// - ${baseUrl}/repos/cloudant/infra/commits/b63a54879672ba25e6fd9c7cf5547ba118b7f6ae
 		parts := strings.Split(notification.Subject.GetURL(), "/")
-		issueNumber, err := strconv.Atoi(parts[len(parts)-1])
-		if err != nil {
-			return nil, err
+
+		lp := len(parts)
+		owner, repo, urlType, subjectID := parts[lp-4], parts[lp-3], parts[lp-2], parts[lp-1]
+		if !(urlType == "issues" || urlType == "commits") {
+			wrappedErr := fmt.Errorf(
+				"unrecognised notification type, can't determine subjectID: %s",
+				notification.Subject.GetURL(),
+			)
+			// it seems like most people would rather the app didn't die because
+			// of we didn't recognise the notification type, so log & continue
+			// rather than returning
+			log.Printf("%v", wrappedErr)
+			continue
+			// return nil, wrappedErr
 		}
-		repo := parts[len(parts)-3]
-		owner := parts[len(parts)-4]
 
 		// Some notifications come with an API link to a comment, via
 		// notification.Subject.GetLatestCommentURL(). This can either point to
@@ -192,14 +198,12 @@ func (ghg *GitHubGateway) GetNotifications() ([]GitHubItem, error) {
 		//
 		// As we could be receiving a comment or an issue, and we only care
 		// about the common-to-both html_url field, we just deserialise into a
-		// struct that contains only that field. That means we can avoid a
-		// larger if statement just to use the "right" type for the result, and
-		// also not worry whether GetLatestCommentURL() gave us a comment or
-		// issue API URL.
+		// struct that contains only that field.
 		type HTMLURLThing struct {
 			HTMLURL string `json:"html_url,omitempty"`
 		}
 		var req *http.Request
+		var err error
 		if notification.Subject.GetLatestCommentURL() != "" {
 			req, err = ghg.c.NewRequest("GET", notification.Subject.GetLatestCommentURL(), nil)
 		} else {
@@ -216,11 +220,10 @@ func (ghg *GitHubGateway) GetNotifications() ([]GitHubItem, error) {
 		htmlURL := issueOrComment.HTMLURL
 
 		item := GitHubItem{
-			Title:      strings.TrimSpace(notification.Subject.GetTitle()),
-			HTMLURL:    htmlURL,
-			APIURL:     notification.Subject.GetURL(),
-			Repository: owner + "/" + repo,
-			ID:         issueNumber,
+			Title:   strings.TrimSpace(notification.Subject.GetTitle()),
+			HTMLURL: htmlURL,
+			APIURL:  notification.Subject.GetURL(),
+			K:       fmt.Sprintf("%s/%s#%s", owner, repo, subjectID),
 		}
 		items = append(items, item)
 	}
