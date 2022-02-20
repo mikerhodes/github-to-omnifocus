@@ -1,19 +1,27 @@
 # Add your GitHub Issues and PRs to Omnifocus
 
-A Go application that adds Omnifocus tasks for:
+A Go application that allows viewing assigned Github issues, PR reviews and
+notifications as tasks within Omnifocus, to allow for a more unified task
+management system.
+
+To do this, the application connects to Github, then creates and manages
+Omnifocus tasks associated with:
 
 - GitHub Issues and PRs assigned to you.
 - GitHub PRs where your review has been requested.
 - Notifications you have received.
 
-Notifications and Review Requests will gain a due date of today.
+Typically, it's run regularly using a tool like `cron` or `launchd`.
 
-If an issue or PR is closed or not assigned to you any more, it will be marked
-complete within Omnifocus.
+Notifications and Review Requests are given a due date of today when created.
+
+If an issue or PR is closed or not assigned to you any more, or a notification
+is viewed,  it will be marked complete within Omnifocus.
 
 The application will **not** close issues in GitHub which are marked as complete
-in Omnifocus -- the GitHub server is considered source-of-truth for issue and
-PR state. This feels safer and, thankfully, is easier to code for.
+in Omnifocus -- to close an issue or PR, it must be closed/merged within
+Github itself. The GitHub server is considered source-of-truth for issue and
+PR state; this feels safer.
 
 `github-to-omnifocus` supports both GitHub and GitHub Enterprise.
 
@@ -59,8 +67,10 @@ with your workflow, it's time to get started:
 1. Create a personal developer token on GitHub for `github-to-omnifocus` to use
     when making requests to GitHub's API.
 1. Set up application configuration.
-1. Run `github-to-omnifocus` via `npx` (included with `npm`), which will run
-    the application _without_ leaving any installed files on your system.
+1. Build `github2omnifocus` using `make build`.
+1. Run `github2omnifocus`.
+
+I run the application every five minutes using cron.
 
 ### Set up Omnifocus projects
 
@@ -114,6 +124,10 @@ Ensure Omnifocus is open. Then run using:
 ```
 make run
 ```
+
+This will build a `github2omnifocus` binary and run it. It's a good way to
+check your setup and build the binary to run via cron (if you want to run
+automatically).
 
 ## Other configuration values
 
