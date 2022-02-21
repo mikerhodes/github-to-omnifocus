@@ -1,3 +1,7 @@
+v2.2
+    - Correct golangci-lint issues.
+v2.1
+    - Correctly process notifications about commits rather than giving up.
 v2.0
     - Rewrite in Go.
 1.8.0 2021-01-20

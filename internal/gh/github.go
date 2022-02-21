@@ -15,6 +15,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
+var paginationPerPage = 30
+
 // GitHubItem is a simple, unified structure we can use to represent issues,
 // PRs and notifications containing only the information the rest of the
 // program requires.
@@ -41,7 +43,7 @@ type GitHubGateway struct {
 	c   *github.Client
 }
 
-func NewGitHubGateway(ctx context.Context, accessToken, APIURL string) (GitHubGateway, error) {
+func NewGitHubGateway(ctx context.Context, accessToken, apiURL string) (GitHubGateway, error) {
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: accessToken},
 	)
@@ -50,7 +52,7 @@ func NewGitHubGateway(ctx context.Context, accessToken, APIURL string) (GitHubGa
 	// Passing APIURL as the uploadURL (2nd param) technically doesn't
 	// work but we never upload so we're okay
 	// list all repositories for the authenticated user
-	client, err := github.NewEnterpriseClient(APIURL, APIURL, tc)
+	client, err := github.NewEnterpriseClient(apiURL, apiURL, tc)
 	if err != nil {
 		return GitHubGateway{}, err
 	}
@@ -64,9 +66,8 @@ func NewGitHubGateway(ctx context.Context, accessToken, APIURL string) (GitHubGa
 // GetIssues downloads and returns the issues for the user authenticated
 // to c, transformed to GitHubItems.
 func (ghg *GitHubGateway) GetIssues() ([]GitHubItem, error) {
-
 	opt := &github.IssueListOptions{
-		ListOptions: github.ListOptions{PerPage: 30},
+		ListOptions: github.ListOptions{PerPage: paginationPerPage},
 	}
 
 	issues := []*github.Issue{}
@@ -106,7 +107,7 @@ func (ghg *GitHubGateway) GetPRs() ([]GitHubItem, error) {
 
 	issues := []*github.Issue{}
 	opt := &github.SearchOptions{
-		ListOptions: github.ListOptions{PerPage: 30},
+		ListOptions: github.ListOptions{PerPage: paginationPerPage},
 	}
 	for {
 		log.Printf("Getting PRs page %d", opt.Page)
@@ -135,12 +136,9 @@ func (ghg *GitHubGateway) GetPRs() ([]GitHubItem, error) {
 }
 
 func (ghg *GitHubGateway) GetNotifications() ([]GitHubItem, error) {
-
-	// TODO Comment URLs
-
 	// Retrieve
 	opt := &github.NotificationListOptions{
-		ListOptions: github.ListOptions{PerPage: 30},
+		ListOptions: github.ListOptions{PerPage: paginationPerPage},
 	}
 	notifications := []*github.Notification{}
 	for {
@@ -159,7 +157,6 @@ func (ghg *GitHubGateway) GetNotifications() ([]GitHubItem, error) {
 	// Transform
 	items := []GitHubItem{}
 	for _, notification := range notifications {
-
 		// notification.Subject.GetURL() is
 		// - ${baseUrl}/repos/cloudant/infra/issues/1500
 		// - ${baseUrl}/repos/cloudant/infra/commits/b63a54879672ba25e6fd9c7cf5547ba118b7f6ae

@@ -3,8 +3,8 @@ package omnifocus
 import "testing"
 
 func TestTaskKey(t *testing.T) {
-	task := OmnifocusTask{
-		Id:   "foo",
+	task := Task{
+		ID:   "foo",
 		Name: "mikerhodes/github-to-omnifocus#3 foo bar foo",
 	}
 	k := task.Key()

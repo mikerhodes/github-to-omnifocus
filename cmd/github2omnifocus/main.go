@@ -15,9 +15,9 @@ import (
 var Version = "development"
 
 type OFCurrentState struct {
-	Issues        []omnifocus.OmnifocusTask
-	PRs           []omnifocus.OmnifocusTask
-	Notifications []omnifocus.OmnifocusTask
+	Issues        []omnifocus.Task
+	PRs           []omnifocus.Task
+	Notifications []omnifocus.Task
 }
 
 type GHDesiredState struct {
@@ -47,7 +47,7 @@ func main() {
 		dueDate.Location())
 
 	// Gateways are used to access Omnifocus and GitHub
-	og := omnifocus.OmnifocusGateway{
+	og := omnifocus.Gateway{
 		AppTag:                  c.AppTag,
 		AssignedTag:             c.AssignedTag,
 		AssignedProject:         c.AssignedProject,
@@ -86,9 +86,17 @@ func main() {
 	log.Printf("Found %d changes to apply to Issues", len(d))
 	for _, d := range d {
 		if d.Type == delta.Add {
-			og.AddIssue(*(d.Item.(*gh.GitHubItem)))
+			err := og.AddIssue(*(d.Item.(*gh.GitHubItem)))
+			if err != nil {
+				// should never fail
+				log.Fatal(err)
+			}
 		} else if d.Type == delta.Remove {
-			og.CompleteIssue(*(d.Item.(*omnifocus.OmnifocusTask)))
+			err := og.CompleteIssue(*(d.Item.(*omnifocus.Task)))
+			if err != nil {
+				// should never fail
+				log.Fatal(err)
+			}
 		}
 	}
 
@@ -96,9 +104,17 @@ func main() {
 	log.Printf("Found %d changes to apply to PRs", len(d))
 	for _, d := range d {
 		if d.Type == delta.Add {
-			og.AddPR(*(d.Item.(*gh.GitHubItem)))
+			err := og.AddPR(*(d.Item.(*gh.GitHubItem)))
+			if err != nil {
+				// should never fail
+				log.Fatal(err)
+			}
 		} else if d.Type == delta.Remove {
-			og.CompletePR(*(d.Item.(*omnifocus.OmnifocusTask)))
+			err := og.CompletePR(*(d.Item.(*omnifocus.Task)))
+			if err != nil {
+				// should never fail
+				log.Fatal(err)
+			}
 		}
 	}
 
@@ -106,9 +122,17 @@ func main() {
 	log.Printf("Found %d changes to apply to Notifications", len(d))
 	for _, d := range d {
 		if d.Type == delta.Add {
-			og.AddNotification(*(d.Item.(*gh.GitHubItem)))
+			err := og.AddNotification(*(d.Item.(*gh.GitHubItem)))
+			if err != nil {
+				// should never fail
+				log.Fatal(err)
+			}
 		} else if d.Type == delta.Remove {
-			og.CompleteNotification(*(d.Item.(*omnifocus.OmnifocusTask)))
+			err := og.CompleteNotification(*(d.Item.(*omnifocus.Task)))
+			if err != nil {
+				// should never fail
+				log.Fatal(err)
+			}
 		}
 	}
 }
@@ -129,12 +153,12 @@ func toSetGH(l []gh.GitHubItem) map[delta.Keyed]struct{} {
 }
 
 // toSetOF creates a delta.Keyed set from a slice of OmnifocusTask
-func toSetOF(l []omnifocus.OmnifocusTask) map[delta.Keyed]struct{} {
+func toSetOF(l []omnifocus.Task) map[delta.Keyed]struct{} {
 	r := map[delta.Keyed]struct{}{}
 	for _, i := range l {
 		// need to clone because range reuses `i` for each item!
-		r[&omnifocus.OmnifocusTask{
-			Id:   i.Id,
+		r[&omnifocus.Task{
+			ID:   i.ID,
 			Name: i.Name,
 		}] = struct{}{}
 	}
@@ -163,7 +187,7 @@ func GetGitHubState(ghg gh.GitHubGateway) (GHDesiredState, error) {
 }
 
 // GetOFState retrieves the current state of our item types from Omnifocus
-func GetOFState(og omnifocus.OmnifocusGateway) (OFCurrentState, error) {
+func GetOFState(og omnifocus.Gateway) (OFCurrentState, error) {
 	ofState := OFCurrentState{}
 	var err error
 

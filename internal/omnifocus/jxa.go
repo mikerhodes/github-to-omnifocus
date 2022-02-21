@@ -10,21 +10,21 @@ import (
 
 // This file holds the wrapper functions for our JXA scripts
 
-// OmnifocusTasksForQuery returns a list of tasks from Omnifocus that
+// TasksForQuery returns a list of tasks from Omnifocus that
 // match the passed query.
-func OmnifocusTasksForQuery(q TaskQuery) ([]OmnifocusTask, error) {
+func TasksForQuery(q TaskQuery) ([]Task, error) {
 	jsCode, _ := jxa.ReadFile("jxa/oftasksforprojectwithtag.js")
 	args, _ := json.Marshal(q)
 
 	out, err := executeScript(jsCode, args)
 	if err != nil {
-		return []OmnifocusTask{}, err
+		return []Task{}, err
 	}
 
-	tasks := []OmnifocusTask{}
+	tasks := []Task{}
 	err = json.Unmarshal(out, &tasks)
 	if err != nil {
-		return []OmnifocusTask{}, err
+		return []Task{}, err
 	}
 
 	return tasks, nil
@@ -32,7 +32,7 @@ func OmnifocusTasksForQuery(q TaskQuery) ([]OmnifocusTask, error) {
 
 // MarkOmnifocusTaskComplete marks a task as complete. t only requires the
 // id field to be set.
-func MarkOmnifocusTaskComplete(t OmnifocusTask) error {
+func MarkOmnifocusTaskComplete(t Task) error {
 	jsCode, _ := jxa.ReadFile("jxa/ofmarktaskcomplete.js")
 	args, _ := json.Marshal(t)
 
@@ -45,7 +45,7 @@ func MarkOmnifocusTaskComplete(t OmnifocusTask) error {
 }
 
 // EnsureTagExists creates a tag in Omnifocus if it doesn't already exist.
-func EnsureTagExists(tag OmnifocusTag) error {
+func EnsureTagExists(tag Tag) error {
 	jsCode, _ := jxa.ReadFile("jxa/ofensuretagexists.js")
 	args, _ := json.Marshal(tag)
 
@@ -58,19 +58,19 @@ func EnsureTagExists(tag OmnifocusTag) error {
 }
 
 // AddNewOmnifocusTask adds a new Omnifocus task
-func AddNewOmnifocusTask(t NewOmnifocusTask) (OmnifocusTask, error) {
+func AddNewOmnifocusTask(t NewOmnifocusTask) (Task, error) {
 	jsCode, _ := jxa.ReadFile("jxa/ofaddnewtask.js")
 	args, _ := json.Marshal(t)
 
 	out, err := executeScript(jsCode, args)
 	if err != nil {
-		return OmnifocusTask{}, err
+		return Task{}, err
 	}
 
-	task := OmnifocusTask{}
+	task := Task{}
 	err = json.Unmarshal(out, &task)
 	if err != nil {
-		return OmnifocusTask{}, err
+		return Task{}, err
 	}
 
 	return task, nil
@@ -96,7 +96,11 @@ func executeScript(jsCode []byte, args []byte) ([]byte, error) {
 	}
 	go func() {
 		defer stdin.Close()
-		io.WriteString(stdin, string(jsCode))
+		_, err := io.WriteString(stdin, string(jsCode))
+		if err != nil {
+			// should never fail
+			log.Fatal(err)
+		}
 	}()
 
 	out, err := cmd.Output()

@@ -11,15 +11,15 @@ import (
 	"fmt"
 )
 
-// DeltaOperationType states whether a DeltaOperation is add or remove.
-type DeltaOperationType int
+// OperationType states whether a DeltaOperation is add or remove.
+type OperationType int
 
 const (
-	Add DeltaOperationType = iota + 1
+	Add OperationType = iota + 1
 	Remove
 )
 
-func (op DeltaOperationType) String() string {
+func (op OperationType) String() string {
 	ops := [...]string{"add", "remove"}
 	if op < Add || op > Remove {
 		return fmt.Sprintf("DeltaOperation(%d)", int(op))
@@ -33,17 +33,16 @@ type Keyed interface {
 	Key() string
 }
 
-// A DeltaOperation states that Item should be added or removed from a set.
-type DeltaOperation struct {
+// A Operation states that Item should be added or removed from a set.
+type Operation struct {
 	Item Keyed
-	Type DeltaOperationType
+	Type OperationType
 }
 
 // Delta returns a slice of DeltaOperations that, when applied to current,
 // will result in current containing the same items as desired.
-func Delta(desired, current map[Keyed]struct{}) []DeltaOperation {
-
-	ops := []DeltaOperation{}
+func Delta(desired, current map[Keyed]struct{}) []Operation {
+	ops := []Operation{}
 
 	// Flipping to use the Key() as the map's hashkey allows for quicker lookup.
 	// Without doing this, we are forced to essentially do the comparison as
@@ -65,7 +64,7 @@ func Delta(desired, current map[Keyed]struct{}) []DeltaOperation {
 	// If it's in desired, and not in current: add it.
 	for k, v := range desired2 {
 		if _, ok := current2[k]; !ok {
-			ops = append(ops, DeltaOperation{
+			ops = append(ops, Operation{
 				Type: Add,
 				Item: v,
 			})
@@ -75,7 +74,7 @@ func Delta(desired, current map[Keyed]struct{}) []DeltaOperation {
 	// If it's in current, and not in desired: remove it.
 	for k, v := range current2 {
 		if _, ok := desired2[k]; !ok {
-			ops = append(ops, DeltaOperation{
+			ops = append(ops, Operation{
 				Type: Remove,
 				Item: v,
 			})

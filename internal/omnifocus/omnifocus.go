@@ -15,25 +15,25 @@ var (
 	jxa embed.FS
 )
 
-// OmnifocusTask represents a task existing in Omnifocus
-type OmnifocusTask struct {
-	Id   string `json:"id"`
+// Task represents a task existing in Omnifocus
+type Task struct {
+	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 
-func (item OmnifocusTask) String() string {
-	return fmt.Sprintf("OmnifocusTask: [%s] %s", item.Key(), item.Name)
+func (t Task) String() string {
+	return fmt.Sprintf("OmnifocusTask: [%s] %s", t.Key(), t.Name)
 }
 
 // Key meets the Keyed interface used for creating delta operations in
 // github2omnifocus.
-func (t OmnifocusTask) Key() string {
+func (t Task) Key() string {
 	// The "key" here is the one used in github2omnifocus rather than the
 	// Id used within Omnifocus. It's an opaque string we receive when creating
 	// the task along with the task's actual title, though we can assume
 	// it doesn't contain spaces. We stick it as the first thing in the task's
 	// Name when we create the tasks.
-	return strings.SplitN(t.Name, " ", 2)[0]
+	return strings.SplitN(t.Name, " ", 2)[0] //nolint:gomnd
 }
 
 // TaskQuery defines a query to find Omnifocus tasks
@@ -51,12 +51,12 @@ type NewOmnifocusTask struct {
 	DueDateMS   int64    `json:"dueDateMS"`
 }
 
-// OmnifocusTag represents an Omnifocus tag
-type OmnifocusTag struct {
+// Tag represents an Omnifocus tag
+type Tag struct {
 	Name string `json:"name"`
 }
 
-type OmnifocusGateway struct {
+type Gateway struct {
 	AppTag                  string
 	AssignedTag             string
 	AssignedProject         string
@@ -68,8 +68,8 @@ type OmnifocusGateway struct {
 	DueDate                 time.Time
 }
 
-func (og *OmnifocusGateway) GetIssues() ([]OmnifocusTask, error) {
-	tasks, err := OmnifocusTasksForQuery(TaskQuery{
+func (og *Gateway) GetIssues() ([]Task, error) {
+	tasks, err := TasksForQuery(TaskQuery{
 		ProjectName: og.AssignedProject,
 		Tags:        []string{og.AppTag, og.AssignedTag},
 	})
@@ -79,8 +79,8 @@ func (og *OmnifocusGateway) GetIssues() ([]OmnifocusTask, error) {
 	return tasks, nil
 }
 
-func (og *OmnifocusGateway) GetPRs() ([]OmnifocusTask, error) {
-	tasks, err := OmnifocusTasksForQuery(TaskQuery{
+func (og *Gateway) GetPRs() ([]Task, error) {
+	tasks, err := TasksForQuery(TaskQuery{
 		ProjectName: og.ReviewProject,
 		Tags:        []string{og.AppTag, og.ReviewTag},
 	})
@@ -90,8 +90,8 @@ func (og *OmnifocusGateway) GetPRs() ([]OmnifocusTask, error) {
 	return tasks, nil
 }
 
-func (og *OmnifocusGateway) GetNotifications() ([]OmnifocusTask, error) {
-	tasks, err := OmnifocusTasksForQuery(TaskQuery{
+func (og *Gateway) GetNotifications() ([]Task, error) {
+	tasks, err := TasksForQuery(TaskQuery{
 		ProjectName: og.NotificationsProject,
 		Tags:        []string{og.AppTag, og.NotificationTag},
 	})
@@ -101,7 +101,7 @@ func (og *OmnifocusGateway) GetNotifications() ([]OmnifocusTask, error) {
 	return tasks, nil
 }
 
-func (og *OmnifocusGateway) AddIssue(t gh.GitHubItem) error {
+func (og *Gateway) AddIssue(t gh.GitHubItem) error {
 	log.Printf("AddIssue: %s", t)
 	_, err := AddNewOmnifocusTask(NewOmnifocusTask{
 		ProjectName: og.AssignedProject,
@@ -115,7 +115,7 @@ func (og *OmnifocusGateway) AddIssue(t gh.GitHubItem) error {
 	return nil
 }
 
-func (og *OmnifocusGateway) AddPR(t gh.GitHubItem) error {
+func (og *Gateway) AddPR(t gh.GitHubItem) error {
 	log.Printf("AddPR: %s", t)
 	_, err := AddNewOmnifocusTask(NewOmnifocusTask{
 		ProjectName: og.ReviewProject,
@@ -129,7 +129,7 @@ func (og *OmnifocusGateway) AddPR(t gh.GitHubItem) error {
 	return nil
 }
 
-func (og *OmnifocusGateway) AddNotification(t gh.GitHubItem) error {
+func (og *Gateway) AddNotification(t gh.GitHubItem) error {
 	log.Printf("AddNotification: %s", t)
 	newT := NewOmnifocusTask{
 		ProjectName: og.NotificationsProject,
@@ -147,7 +147,7 @@ func (og *OmnifocusGateway) AddNotification(t gh.GitHubItem) error {
 	return nil
 }
 
-func (og *OmnifocusGateway) CompleteIssue(t OmnifocusTask) error {
+func (og *Gateway) CompleteIssue(t Task) error {
 	log.Printf("CompleteIssue: %s", t)
 	err := MarkOmnifocusTaskComplete(t)
 	if err != nil {
@@ -156,7 +156,7 @@ func (og *OmnifocusGateway) CompleteIssue(t OmnifocusTask) error {
 	return nil
 }
 
-func (og *OmnifocusGateway) CompletePR(t OmnifocusTask) error {
+func (og *Gateway) CompletePR(t Task) error {
 	log.Printf("CompletePR: %s", t)
 	err := MarkOmnifocusTaskComplete(t)
 	if err != nil {
@@ -165,7 +165,7 @@ func (og *OmnifocusGateway) CompletePR(t OmnifocusTask) error {
 	return nil
 }
 
-func (og *OmnifocusGateway) CompleteNotification(t OmnifocusTask) error {
+func (og *Gateway) CompleteNotification(t Task) error {
 	log.Printf("CompleteNotification: %s", t)
 	err := MarkOmnifocusTaskComplete(t)
 	if err != nil {
