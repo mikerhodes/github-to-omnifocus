@@ -164,7 +164,7 @@ func (ghg *GitHubGateway) GetNotifications() ([]GitHubItem, error) {
 
 		lp := len(parts)
 		owner, repo, urlType, subjectID := parts[lp-4], parts[lp-3], parts[lp-2], parts[lp-1]
-		if !(urlType == "issues" || urlType == "commits") {
+		if !(urlType == "issues" || urlType == "commits" || urlType == "pulls") {
 			wrappedErr := fmt.Errorf(
 				"unrecognised notification type, can't determine subjectID: %s",
 				notification.Subject.GetURL(),

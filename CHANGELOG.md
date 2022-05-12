@@ -1,3 +1,5 @@
+v2.3
+    - Support notifications for pull requests.
 v2.2
     - Correct golangci-lint issues.
 v2.1
