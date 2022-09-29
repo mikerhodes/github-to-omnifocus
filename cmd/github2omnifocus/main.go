@@ -5,10 +5,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/mikerhodes/github-to-omnifocus/internal"
-	"github.com/mikerhodes/github-to-omnifocus/internal/delta"
-	"github.com/mikerhodes/github-to-omnifocus/internal/gh"
-	"github.com/mikerhodes/github-to-omnifocus/internal/omnifocus"
+	"github.com/nate-double-u/github-to-omnifocus/internal"
+	"github.com/nate-double-u/github-to-omnifocus/internal/delta"
+	"github.com/nate-double-u/github-to-omnifocus/internal/gh"
+	"github.com/nate-double-u/github-to-omnifocus/internal/omnifocus"
 )
 
 // Version can be overridden at build time using PROJECT_VERSION in the makefile.
