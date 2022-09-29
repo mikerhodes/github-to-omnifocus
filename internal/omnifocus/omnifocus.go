@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mikerhodes/github-to-omnifocus/internal/gh"
+	"github.com/nate-double-u/github-to-omnifocus/internal/gh"
 )
 
 var (

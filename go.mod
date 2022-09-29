@@ -1,4 +1,4 @@
-module github.com/mikerhodes/github-to-omnifocus
+module github.com/nate-double-u/github-to-omnifocus
 
 go 1.17
 
