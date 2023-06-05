@@ -161,8 +161,14 @@ func (ghg *GitHubGateway) GetNotifications() ([]GitHubItem, error) {
 		// - ${baseUrl}/repos/cloudant/infra/issues/1500
 		// - ${baseUrl}/repos/cloudant/infra/commits/b63a54879672ba25e6fd9c7cf5547ba118b7f6ae
 		parts := strings.Split(notification.Subject.GetURL(), "/")
-
 		lp := len(parts)
+
+		if lp < 5 {
+			// We should find at least 5 parts: host+"repos", owner, repo, type, ID
+			// https://github.com/mikerhodes/github-to-omnifocus/issues/10
+			continue
+		}
+
 		owner, repo, urlType, subjectID := parts[lp-4], parts[lp-3], parts[lp-2], parts[lp-1]
 		if !(urlType == "issues" || urlType == "commits" || urlType == "pulls") {
 			wrappedErr := fmt.Errorf(
