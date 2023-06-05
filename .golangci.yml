@@ -3,59 +3,16 @@
 run:
   timeout: 5m
 
-output:
-  format: checkstyle
-
 linters:
-  # please, do not use `enable-all`: it's deprecated and will be removed soon.
-  # inverted configuration with `enable-all` and `disable` is not scalable during updates of golangci-lint
   disable-all: true
   enable:
-    # re-enable defaults
-    # - govet
-    # - errcheck
-    # - staticcheck
-    # - unused
-    # - gochecknoinits
-    # - gosimple
-    # - structcheck
-    # - varcheck
-    # - ineffassign
-    # - deadcode
-    # - typecheck
-    # - interfacer
-    # enable others
-    - bodyclose
-    - deadcode
-    - depguard
-    - dogsled
-    - dupl
-    - errcheck
-    - goconst
-    - gocritic
-    - gocyclo
-    - gofmt
-    - goimports
-    - golint
-    - gomnd
-    - goprintffuncname
+    # Add gosec
     - gosec
+    # Defaults per 1.52.2
+    - errcheck
     - gosimple
     - govet
     - ineffassign
-    - nakedret
-    - nolintlint
-    - scopelint
     - staticcheck
-    - structcheck
     - typecheck
-    - unconvert
-    - unparam
     - unused
-    - varcheck
-    - whitespace
-
-linters-settings:
-  gofmt:
-    # VSCode uses goreturns by default which doesn't support -s/simplify
-    simplify: false
