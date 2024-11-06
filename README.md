@@ -155,6 +155,15 @@ As mentioned, the only value that must be specified is `AccessToken`.
     be unique for each type of task, and it isn't necessary to give the
     app its "own" projects as it uses tags to identify its own tasks.
 
+## Config path can be passed in
+
+This can be useful if you perhaps have multiple github instances to sync with.
+You can simply make multiple config files and pass them into the run command like this..
+
+```
+github2omnifocus --config ~/.config/github2omnifocus/enterprise-config.json
+```
+
 ## Known Issues
 
 See the [Issues](https://github.com/mikerhodes/github-to-omnifocus/issues) in
