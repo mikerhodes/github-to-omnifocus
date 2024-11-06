@@ -3,7 +3,6 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -33,15 +32,20 @@ type Config struct {
 }
 
 // LoadConfig loads JSON config from ~/.config/github2omnifocus/config.json
-func LoadConfig() (Config, error) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return Config{}, fmt.Errorf("could not find home dir: %v", err)
+func LoadConfig(configPathOverride string) (Config, error) {
+	var configPath string
+	if configPathOverride != "" {
+		configPath = configPathOverride
+	} else {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return Config{}, fmt.Errorf("could not find home dir: %v", err)
+		}
+		configPath = path.Join(home, ".config", "github2omnifocus", "config.json")
 	}
-	configPath := path.Join(home, ".config", "github2omnifocus", "config.json")
 
 	var bytes []byte
-	bytes, err = ioutil.ReadFile(configPath)
+	bytes, err := os.ReadFile(configPath)
 	if err != nil {
 		return Config{}, fmt.Errorf("expected config.json at %s: %v", configPath, err)
 	}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log"
 	"time"
 
@@ -29,7 +30,10 @@ type GHDesiredState struct {
 func main() {
 	log.Printf("[main] Starting github2omnifocus; version: %s.", Version)
 
-	c, err := internal.LoadConfig()
+	configPathOverride := flag.String("config", "", "Path to the config file")
+	flag.Parse()
+
+	c, err := internal.LoadConfig(*configPathOverride)
 	if err != nil {
 		log.Fatal(err)
 	}

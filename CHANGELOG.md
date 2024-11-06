@@ -1,3 +1,5 @@
+v2.4.1
+    - Fix https://github.com/mikerhodes/github-to-omnifocus/issues/22
 v2.4
     - Fix https://github.com/mikerhodes/github-to-omnifocus/issues/10
 v2.3
