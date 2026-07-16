@@ -89,13 +89,14 @@ func main() {
 	d := delta.Delta(toSetGH(desiredState.Issues), toSetOF(currentState.Issues))
 	log.Printf("Found %d changes to apply to Issues", len(d))
 	for _, d := range d {
-		if d.Type == delta.Add {
+		switch d.Type {
+		case delta.Add:
 			err := og.AddIssue(*(d.Item.(*gh.GitHubItem)))
 			if err != nil {
 				// should never fail
 				log.Fatal(err)
 			}
-		} else if d.Type == delta.Remove {
+		case delta.Remove:
 			err := og.CompleteIssue(*(d.Item.(*omnifocus.Task)))
 			if err != nil {
 				// should never fail
@@ -107,13 +108,14 @@ func main() {
 	d = delta.Delta(toSetGH(desiredState.PRs), toSetOF(currentState.PRs))
 	log.Printf("Found %d changes to apply to PRs", len(d))
 	for _, d := range d {
-		if d.Type == delta.Add {
+		switch d.Type {
+		case delta.Add:
 			err := og.AddPR(*(d.Item.(*gh.GitHubItem)))
 			if err != nil {
 				// should never fail
 				log.Fatal(err)
 			}
-		} else if d.Type == delta.Remove {
+		case delta.Remove:
 			err := og.CompletePR(*(d.Item.(*omnifocus.Task)))
 			if err != nil {
 				// should never fail
@@ -125,13 +127,14 @@ func main() {
 	d = delta.Delta(toSetGH(desiredState.Notifications), toSetOF(currentState.Notifications))
 	log.Printf("Found %d changes to apply to Notifications", len(d))
 	for _, d := range d {
-		if d.Type == delta.Add {
+		switch d.Type {
+		case delta.Add:
 			err := og.AddNotification(*(d.Item.(*gh.GitHubItem)))
 			if err != nil {
 				// should never fail
 				log.Fatal(err)
 			}
-		} else if d.Type == delta.Remove {
+		case delta.Remove:
 			err := og.CompleteNotification(*(d.Item.(*omnifocus.Task)))
 			if err != nil {
 				// should never fail

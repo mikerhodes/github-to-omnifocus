@@ -1,18 +1,28 @@
-# docs https://golangci-lint.run/usage/configuration/
-
-run:
-  timeout: 5m
-
+version: "2"
 linters:
-  disable-all: true
+  default: none
   enable:
-    # Add gosec
-    - gosec
-    # Defaults per 1.52.2
     - errcheck
-    - gosimple
+    - gosec
     - govet
     - ineffassign
     - staticcheck
-    - typecheck
     - unused
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

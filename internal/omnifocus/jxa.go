@@ -2,7 +2,6 @@ package omnifocus
 
 import (
 	"encoding/json"
-	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -96,7 +95,7 @@ func executeScript(jsCode []byte, args []byte) ([]byte, error) {
 	}
 	go func() {
 		defer stdin.Close()
-		_, err := io.WriteString(stdin, string(jsCode))
+		_, err := stdin.Write(jsCode)
 		if err != nil {
 			// should never fail
 			log.Fatal(err)
