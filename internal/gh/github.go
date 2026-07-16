@@ -171,16 +171,15 @@ func (ghg *GitHubGateway) GetNotifications() ([]GitHubItem, error) {
 
 		owner, repo, urlType, subjectID := parts[lp-4], parts[lp-3], parts[lp-2], parts[lp-1]
 		if urlType != "issues" && urlType != "commits" && urlType != "pulls" {
-			wrappedErr := fmt.Errorf(
+			msg := fmt.Sprintf(
 				"unrecognised notification type, can't determine subjectID: %s",
 				notification.Subject.GetURL(),
 			)
 			// it seems like most people would rather the app didn't die because
 			// of we didn't recognise the notification type, so log & continue
 			// rather than returning
-			log.Printf("%v", wrappedErr)
+			log.Println(msg)
 			continue
-			// return nil, wrappedErr
 		}
 
 		// Some notifications come with an API link to a comment, via
